@@ -1,0 +1,16 @@
+limit number of threads open
+
+Other subtitle sites
+Handle languages format
+Handle if the same episode is downloaded twice in different formats (Person of Interest 4x04)
+Add API to scan folder
+Add API to get current contents of folder in file.
+Debug Logger (color by Thread)
+
+System icon with start/stop
+UI for config
+In UI - tab to Scan Now specific folder
+Different file name formats
+Handle Movies
+Handle MoveFiles flag
+

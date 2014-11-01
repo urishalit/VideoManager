@@ -1,4 +1,4 @@
-set dir=C:\Users\Uri\Downloads\Torrents\Scripts
+set dir=D:\Src\VideoManager
 cd %dir%
 rem python listener.py
 python VideoManager.py

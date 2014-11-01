@@ -5,8 +5,7 @@ import time
 import pickle
 import sys
 
-# My files
-from VideoOrganizer import VideoOrganizer
+from threading import Thread
 
 ACTIONS = {
 	1 : "Created",
@@ -21,45 +20,19 @@ FILE_LIST_DIRECTORY = 0x0001
 # Name of file to save image of files in Download directory
 DOWNLOAD_DIR_DILES_LIST_FILE_NAME = 'DownloadDirFiles'
 
-
+class IFileChangeRecipient:
+	def OnFileChange(self, filePath, action):
+		raise NotImplementedError("Should have implemented this")
 
 class FileListener:
-	def __init__(self, configData, start: bool):
-		self.configData = configData
-		self.pathToWatch = self.configData['DownloadDirectory']
+	def __init__(self, pathToWatch, sink: IFileChangeRecipient):
+		self.pathToWatch = pathToWatch
+		self.sink = sink
 		if not os.path.isdir(self.pathToWatch):
-			print('-- ERROR: Download Directory does not exist')
-			sys.exit()
+			print('-- ERROR: Download Directory does not exist (' + self.pathToWatch + ')')
+			raise
 
-		if start:
-			self.videoOrganizer = VideoOrganizer(configData)
-
-	def SaveDownloadDirFileList(self, files):
-		with open(os.path.join(os.getcwd(), DOWNLOAD_DIR_DILES_LIST_FILE_NAME), 'wb') as h:
-			pickle.dump(files, h)
-
-
-	def GetDownloadDirFileList(self):
-		try:
-			with open(os.path.join(os.getcwd(), DOWNLOAD_DIR_DILES_LIST_FILE_NAME), 'rb') as h:
-				return pickle.load(h)
-		except:
-			return []
-
-	def CheckForNewFilesSinceLastTime(self):
-		# Check if there are new files in the Download directory
-		currFiles = os.listdir(self.pathToWatch)
-		prevFiles = self.GetDownloadDirFileList()
-		# Get the difference in the files image in the download directory
-		diffFiles = list(set(currFiles) - set(prevFiles))
-		for file in diffFiles:
-			self.videoOrganizer.Organize(os.path.join(self.pathToWatch, file))
-		# Save the current image of the files
-		self.SaveDownloadDirFileList(currFiles)
-
-	def Start(self):
-		self.CheckForNewFilesSinceLastTime()
-		
+	def ListenerThread(self):
 		hDir = win32file.CreateFile(self.pathToWatch,
 									FILE_LIST_DIRECTORY,
 									win32con.FILE_SHARE_READ | win32con.FILE_SHARE_WRITE | win32con.FILE_SHARE_DELETE,
@@ -81,12 +54,13 @@ class FileListener:
 			for action, file in results:
 				if action == 1:
 					filePath = os.path.join(self.pathToWatch, file)
-
-					print(filePath, ACTIONS.get (action, "Unknown"))
 					# TODO - Change to real logic!
 					time.sleep(1)
+					self.sink.OnFileChange(filePath, ACTIONS.get (action, "Unknown"))
 
-					self.videoOrganizer.Organize(filePath)
+	def Start(self):
+		self.listenerThread = Thread(target = self.ListenerThread)
+		self.listenerThread.start()
 
 def main():
 	path = r'C:\Users\Uri\Downloads\Torrents\Completed\Siboni\Test'

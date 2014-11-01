@@ -1,5 +1,5 @@
+Verify logics of file already exist work
 Add API to scan folde
-Move the Init_dir logic from the listener to a more generic place
 Do not copy movies to tv show working dir
 limit number of threads open
 When overiding series name from opensubtitles - check similarity...

@@ -13,6 +13,7 @@ from EpisodeData import EpisodeData
 from SubtitleManager import SubtitleManager
 from TVManager import TVManager
 from Notifier import Notifier
+from FileListener import *
 
 # Known vid extensions
 vidExtenstions = ['.avi','.mkv','.mp4']
@@ -21,8 +22,7 @@ vidExtenstions = ['.avi','.mkv','.mp4']
 workersLock = threading.Lock()
 
 
-class VideoOrganizer:
-
+class VideoOrganizer(IFileChangeRecipient):
 	def isVidFile(self, file):
 		ext = os.path.splitext(file)[1]
 		return ext in vidExtenstions
@@ -78,7 +78,7 @@ class VideoOrganizer:
 		for file in os.listdir(dir):
 			self.OrganizeVideo(dir, file, isNewDownload)
 
-	def Start(self, path, isNewDownload=False):
+	def Process(self, path, isNewDownload=False):
 		if os.path.isdir(path):
 			self.OrganizeVideos(path, isNewDownload)
 			shutil.rmtree(path)
@@ -96,7 +96,7 @@ class VideoOrganizer:
 			elif os.path.isfile(path):
 				shutil.copyfile(path, newPath)	
 
-			self.Start(newPath, True)
+			self.Process(newPath, True)
 			workersLock.release()
 			print('-- Worker Thread terminated --')
 		except:
@@ -104,8 +104,9 @@ class VideoOrganizer:
 			traceback.print_exc(file=sys.stdout)
 			print('-' * 60)
 
-	def Organize(self, path):
-		thread = Thread(target = self.WorkerThread, args = (path, ))
+	def OnFileChange(self, filePath, action):
+		print("-- " + filePath + " " + action)
+		thread = Thread(target = self.WorkerThread, args = (filePath, ))
 		thread.start()
 
 	def ScanThread(self):
@@ -116,7 +117,7 @@ class VideoOrganizer:
 
 			# Scan all files in working dir and see if we can make any ready
 			for file in os.listdir(self.workingDir):
-				self.Start(os.path.join(self.workingDir, file))
+				self.Process(os.path.join(self.workingDir, file))
 
 			# Send Notification (email) if there is any new news to update
 			self.notifier.SendNotification()
@@ -133,6 +134,44 @@ class VideoOrganizer:
 			traceback.print_exc(file=sys.stdout)
 			print('-' * 60)
 
+	def SaveDownloadDirFileList(self, files):
+		with open(os.path.join(os.getcwd(), DOWNLOAD_DIR_DILES_LIST_FILE_NAME), 'wb') as h:
+			pickle.dump(files, h)
+
+
+	def GetDownloadDirFileList(self):
+		try:
+			with open(os.path.join(os.getcwd(), DOWNLOAD_DIR_DILES_LIST_FILE_NAME), 'rb') as h:
+				return pickle.load(h)
+		except:
+			return []
+
+	def CheckForNewFilesSinceLastTime(self):
+		# Check if there are new files in the Download directory
+		currFiles = os.listdir(self.downloadDir)
+		prevFiles = self.GetDownloadDirFileList()
+		# Get the difference in the files image in the download directory
+		diffFiles = list(set(currFiles) - set(prevFiles))
+		for file in diffFiles:
+			self.OnFileChange(os.path.join(self.downloadDir, file), "Created")
+		# Save the current image of the files
+		self.SaveDownloadDirFileList(currFiles)
+
+	def InitDir(self):
+		files = os.listdir(self.downloadDir)
+		self.SaveDownloadDirFileList(files)
+		print('-- Dir Contenets saved')
+
+	def StartFully(self):
+		# Start file listener
+		self.fileListener.Start()
+
+		# Start Scanner Thread
+		self.scanThread.start()
+
+		# Check if there are new files in the Download directory since last time
+		self.CheckForNewFilesSinceLastTime()
+
 	def __init__(self, configData):
 		self.configData = configData
 		self.subtitleManager = SubtitleManager(configData)
@@ -140,6 +179,8 @@ class VideoOrganizer:
 		self.workingDir = configData["WorkingDirectory"]
 		self.downloadDir = configData["DownloadDirectory"]
 		self.scanIntervalSec = configData["ScanIntervalSec"]
-		self.scanThread = Thread(target = self.ScanThread)
-		self.scanThread.start()
 		self.notifier = Notifier(configData)
+		self.scanThread = Thread(target = self.ScanThread)
+		self.fileListener = FileListener(self.downloadDir, self)
+
+		

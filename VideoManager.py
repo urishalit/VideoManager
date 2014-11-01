@@ -8,11 +8,11 @@ sys.path.append(os.path.abspath('Subtitles'))
 sys.path.append(os.path.abspath('Utils'))
 
 # My files
-from FileListener import FileListener
+from VideoOrganizer import VideoOrganizer
 
 CONFIGURATION_FILE_NAME = "config.json"
 
-ACTION_START = "start"
+ACTION_FULL = "full"
 ACTION_INIT_DIR = "init_dir"
 
 def GetParameterValue(argName, defaultValue = "", prefix='-', suffix='='):
@@ -54,29 +54,30 @@ def LoadConfigFile(configFile):
 	return configData
 
 def main():
-	# If given a config file path in command line - use it - otherwise look for it in the same directory
-	configFile = GetParameterValue("configFile", GetDefaultConfigFilePath())
+	try:
+		# If given a config file path in command line - use it - otherwise look for it in the same directory
+		configFile = GetParameterValue("configFile", GetDefaultConfigFilePath())
 
-	# Load the Config File data
-	configData = LoadConfigFile(configFile)
+		# Load the Config File data
+		configData = LoadConfigFile(configFile)
 
-	# Get the action requested	
-	action = GetParameterValue("action", ACTION_START)
+		# Get the action requested	
+		action = GetParameterValue("action", ACTION_FULL)
 
-	# Start the listener
-	listener = FileListener(configData, action.lower() == ACTION_START)
+		# Start the Video Organizer
+		vidOrganizer = VideoOrganizer(configData)
 
-	if action.lower() == ACTION_INIT_DIR:
-		# Initiate Directory
-		files = listener.GetDownloadDirFileList()
-		listener.SaveDownloadDirFileList(files)
-		print('Dir Contenets saved')
-	elif action.lower() == ACTION_START:
-		# Start the Video Manager
-		listener.Start()
-		
-	else:
-		print('ERROR: Unknown action (' + action + ')')
+		if action.lower() == ACTION_INIT_DIR:
+			# Initiate Directory
+			vidOrganizer.InitDir()
+		elif action.lower() == ACTION_FULL:
+			# Start the Video Manager
+			vidOrganizer.StartFully()
+		else:
+			print('ERROR: Unknown action (' + action + ')')
+	except:
+		print('Exiting due to error...')
+		traceback.print_exc(file=sys.stdout)
 
 if __name__ == "__main__":
     main()

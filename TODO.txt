@@ -1,10 +1,12 @@
+Add API to scan folde
+Move the Init_dir logic from the listener to a more generic place
+Do not copy movies to tv show working dir
 limit number of threads open
+When overiding series name from opensubtitles - check similarity...
 
 Other subtitle sites
 Handle languages format
 Handle if the same episode is downloaded twice in different formats (Person of Interest 4x04)
-Add API to scan folder
-Add API to get current contents of folder in file.
 Debug Logger (color by Thread)
 
 System icon with start/stop

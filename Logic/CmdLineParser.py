@@ -69,6 +69,13 @@ def DisplayHelp():
 	print('   -showsdir=\t\tThe root folder to place files that are ready to watch')
 	print('          \t\t(renamed and subtitles ready).')
 	print('')
+	print('   -noemails=\t\tSet no emails to be set. If there is a config file')
+	print('          \t\tpresent with emails - this will override it.')
+	print('')
+	print('   -emails=\t\tA comma seperated list of emails to send notifications') 
+	print('          \t\tto. If there is a config filepresent with emails - this')
+	print('          \t\twill override it.')
+	print('')
 
 def DisplayConfigHelp():
 	print('ConfigHelp: TBD')
@@ -168,5 +175,26 @@ def ParseCmdLine():
 	if len(showsDir) > 0:
 		print(showsDir)
 		configData["TVShows"]["TargetDirectory"] = showsDir
+
+	noemails = GetParameterValue(CMD_ARG_NO_EMAIL, False, '-', '')
+	emails = GetParameterValue(CMD_ARG_EMAILS)
+
+	if noemails and len(emails) > 0:
+		print('ERROR: Cannot use no emails flags with the emails flag - Contracdiction!')
+		return None
+
+	# If user defined not to send emails - we override the email list by an empty list
+	if noemails:
+		configData['Emails'] = []
+
+	# If user defined emails to send to - we override the email list given in the config file
+	if len(emails) > 0:
+		# Parse the emails list string to a list
+		if emails.find(','):
+			emails = emails.split(',')
+		else:
+			emails = [emails]
+		
+		configData['Emails'] = emails
 
 	return configData

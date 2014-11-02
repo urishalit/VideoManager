@@ -71,17 +71,20 @@ class VideoOrganizer(IFileChangeRecipient):
 				print("---- Not supporting movie files yet: " + file)
 				return
 
-	def OrganizeVideos(self, dir, isNewDownload):
-		if not os.path.isdir(dir):
-			return
-
-		for file in os.listdir(dir):
-			self.OrganizeVideo(dir, file, isNewDownload)
-
-	def Process(self, path, isNewDownload=False):
+	def Process(self, path, isNewDownload=False, removeDir=True):
 		if os.path.isdir(path):
-			self.OrganizeVideos(path, isNewDownload)
-			shutil.rmtree(path)
+			for file in os.listdir(path):
+				self.Process(os.path.join(path, file), isNewDownload, False)
+			
+			if removeDir:
+				# Only if the working driectory is different then the target directory we attempt to
+				# we attempt to remove the folder as it should be emppty after processed
+				if self.workingDir != self.configData["TVShows"]["TargetDirectory"]:
+					if os.path.exists(path):
+						try:
+							shutil.rmtree(path)			
+						except:
+							print('---- Failed removing directory ' + path)
 		else:
 			self.OrganizeVideo(os.path.dirname(path), os.path.basename(path), isNewDownload)
 
@@ -89,12 +92,16 @@ class VideoOrganizer(IFileChangeRecipient):
 		try:
 			print('-- Worker Thread initiated --')
 			workersLock.acquire()
-			newPath = os.path.join(self.workingDir, os.path.basename(path))
-			print('---- Copying ' + path + ' to ' + newPath)
-			if os.path.isdir(path):
-				shutil.copytree(path, newPath)
-			elif os.path.isfile(path):
-				shutil.copyfile(path, newPath)	
+
+			if self.workingDir != self.downloadDir:
+				newPath = os.path.join(self.workingDir, os.path.basename(path))
+				print('---- Copying ' + path + ' to ' + newPath)
+				if os.path.isdir(path):
+					shutil.copytree(path, newPath)
+				elif os.path.isfile(path):
+					shutil.copyfile(path, newPath)	
+			else:
+				newPath = path
 
 			self.Process(newPath, True)
 			workersLock.release()
@@ -173,6 +180,12 @@ class VideoOrganizer(IFileChangeRecipient):
 		# Check if there are new files in the Download directory since last time
 		self.CheckForNewFilesSinceLastTime()
 
+	def ScanDir(self):
+		print('-- Scanning Directory ' + self.workingDir)
+		self.Process(self.workingDir)
+		self.notifier.SendNotification()
+		print('-- Scan completed.')
+
 	def Start(self):
 		action = self.configData['action']
 
@@ -180,6 +193,8 @@ class VideoOrganizer(IFileChangeRecipient):
 			self.StartFully()
 		elif Actions.init_dir == action:
 			self.InitDir()
+		elif Actions.scan_dir == action:
+			self.ScanDir()
 		else:
 			print('ERROR: Unknown action: Should never get here')
 

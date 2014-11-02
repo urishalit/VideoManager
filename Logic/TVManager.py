@@ -19,7 +19,10 @@ class TVManager:
 			if not os.path.isdir(self.showsRootDir):
 				self.showsRootDir = ''
 
-		if Actions.init_dir != configData['action']:
+		# If the shows dir is the same as the working directory - we do not move the files
+		self.moveFiles = self.showsRootDir != configData['WorkingDirectory']
+
+		if self.moveFiles:
 			print('-- Shows Root Directory is ' + self.showsRootDir)
 
 		#TODO Add format in config data
@@ -54,6 +57,9 @@ class TVManager:
 
 	
 	def MoveToShowsDirectory(self, epData : EpisodeData):
+		if not self.moveFiles:
+			return
+			
 		targetRootPath = self.showsRootDir
 
 		# Construct Target Dir - RootDir\Series\Season X

@@ -4,6 +4,7 @@ Do not copy movies to tv show working dir
 limit number of threads open
 When overiding series name from opensubtitles - check similarity...
 Add ConfigHelp
+Fix remove directory to always wortk in VideoOrganizer::Process
 
 Other subtitle sites
 Handle languages format

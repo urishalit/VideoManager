@@ -14,6 +14,7 @@ from SubtitleManager import SubtitleManager
 from TVManager import TVManager
 from Notifier import Notifier
 from FileListener import *
+from CmdLineConsts import *
 
 # Known vid extensions
 vidExtenstions = ['.avi','.mkv','.mp4']
@@ -69,7 +70,6 @@ class VideoOrganizer(IFileChangeRecipient):
 			else:
 				print("---- Not supporting movie files yet: " + file)
 				return
-
 
 	def OrganizeVideos(self, dir, isNewDownload):
 		if not os.path.isdir(dir):
@@ -158,9 +158,10 @@ class VideoOrganizer(IFileChangeRecipient):
 		self.SaveDownloadDirFileList(currFiles)
 
 	def InitDir(self):
+		print('-- Directory: ' + self.downloadDir)
 		files = os.listdir(self.downloadDir)
 		self.SaveDownloadDirFileList(files)
-		print('-- Dir Contenets saved')
+		print('-- Directory contenets saved')
 
 	def StartFully(self):
 		# Start file listener
@@ -171,6 +172,16 @@ class VideoOrganizer(IFileChangeRecipient):
 
 		# Check if there are new files in the Download directory since last time
 		self.CheckForNewFilesSinceLastTime()
+
+	def Start(self):
+		action = self.configData['action']
+
+		if Actions.full == action:
+			self.StartFully()
+		elif Actions.init_dir == action:
+			self.InitDir()
+		else:
+			print('ERROR: Unknown action: Should never get here')
 
 	def __init__(self, configData):
 		self.configData = configData

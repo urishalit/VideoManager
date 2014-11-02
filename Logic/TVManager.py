@@ -4,6 +4,7 @@ import shutil
 
 # My Files
 from EpisodeData import EpisodeData
+from CmdLineConsts import *
 
 class TVManager:
 	def __init__(self, configData):
@@ -18,7 +19,8 @@ class TVManager:
 			if not os.path.isdir(self.showsRootDir):
 				self.showsRootDir = ''
 
-		print('-- Shows Root Directory is ' + self.showsRootDir)
+		if Actions.init_dir != configData['action']:
+			print('-- Shows Root Directory is ' + self.showsRootDir)
 
 		#TODO Add format in config data
 

@@ -2,3 +2,5 @@ DownloadDirFiles
 Logic/__pycache__/FileListener.cpython-34.pyc
 *.pyc
 Logic/__pycache__/FileListener.cpython-34.pyc
+*.pyc
+Logic/__pycache__/VideoOrganizer.cpython-34.pyc

@@ -1,8 +1,9 @@
 Verify logics of file already exist work
-Add API to scan folde
+Add API to scan folder + options (work in dir - sort files, etc...)
 Do not copy movies to tv show working dir
 limit number of threads open
 When overiding series name from opensubtitles - check similarity...
+Add ConfigHelp
 
 Other subtitle sites
 Handle languages format

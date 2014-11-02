@@ -7,7 +7,7 @@ import sys
 
 from threading import Thread
 
-ACTIONS = {
+FILE_ACTIONS = {
 	1 : "Created",
 	2 : "Deleted",
 	3 : "Updated",
@@ -56,7 +56,7 @@ class FileListener:
 					filePath = os.path.join(self.pathToWatch, file)
 					# TODO - Change to real logic!
 					time.sleep(1)
-					self.sink.OnFileChange(filePath, ACTIONS.get (action, "Unknown"))
+					self.sink.OnFileChange(filePath, FILE_ACTIONS.get (action, "Unknown"))
 
 	def Start(self):
 		self.listenerThread = Thread(target = self.ListenerThread)

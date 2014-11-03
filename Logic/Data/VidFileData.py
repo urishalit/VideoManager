@@ -1,5 +1,8 @@
 import os.path
 import os
+import shutil
+import stat
+
 from enum import Enum
 
 class VideoType(Enum):
@@ -122,11 +125,15 @@ class VidFileData:
 		
 		for file in self.associatedFiles:
 			targetFilePath = os.path.join(targetPath, os.path.basename(file))
+			# If the file is marked as read-only we remove the read-only flag and then move it.
+			if not os.access(file, os.W_OK):
+				os.chmod(file, stat.S_IWUSR)
+
 			if moveFiles:
-				os.rename(file, targetFilePath)
+				shutil.move(file, targetFilePath)
 			else:
 				os.remove(file)
 
-	def Equals(otherFileData):
+	def Equals(self, otherFileData):
 		return self.fileDir == otherFileData.fileDir and self.fileName == otherFileData.fileName
 

@@ -5,6 +5,7 @@ import traceback
 
 # Add paths of scripts to paths Python looks for scripts in.
 sys.path.append(os.path.abspath('Logic'))
+sys.path.append(os.path.abspath(os.path.join('Logic', 'Data')))
 sys.path.append(os.path.abspath('Subtitles'))
 sys.path.append(os.path.abspath('Utils'))
 

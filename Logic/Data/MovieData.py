@@ -11,7 +11,6 @@ class MovieData(VidFileData):
 		self.title = title
 		self.year = str(year)
 		self.type = VideoType.movie
-		self.workingDir = self.configData["Movies"]["WorkingDirectory"]
 		self.InitiateTargetDirectory(configData["Movies"]["TargetDirectory"])
 
 	def GetMovieTitle(self):

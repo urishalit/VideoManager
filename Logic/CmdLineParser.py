@@ -178,8 +178,7 @@ def ParseCmdLine():
 	# Check if there is a working directory to override the one in the config file
 	workingDir = GetParameterValue(CMD_ARG_WORKING_DIR, workingDir)
 	if len(workingDir) > 0:
-		configData["TVShows"]["WorkingDirectory"] = workingDir
-		configData["Movies"]["WorkingDirectory"] = workingDir
+		configData["WorkingDirectory"] = workingDir
 
 	# Check if there is a shows target directory to override the one in the config file
 	showsDir = GetParameterValue(CMD_ARG_SHOWS_DIR, showsDir)

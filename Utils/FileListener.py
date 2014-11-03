@@ -2,7 +2,6 @@ import os
 import win32file
 import win32con
 import time
-import pickle
 import sys
 
 from threading import Thread
@@ -16,9 +15,6 @@ FILE_ACTIONS = {
 }
 
 FILE_LIST_DIRECTORY = 0x0001
-
-# Name of file to save image of files in Download directory
-DOWNLOAD_DIR_DILES_LIST_FILE_NAME = 'DownloadDirFiles'
 
 class IFileChangeRecipient:
 	def OnFileChange(self, filePath, action):

@@ -17,7 +17,7 @@ class VidFileData:
 		self.associatedFiles.insert(0, self.GetFilePath())
 		self.baseFileName = os.path.basename(self.fileName)
 		self.type = VideoType.unknown
-		self.workingDir = ''
+		self.workingDir = configData["WorkingDirectory"]
 		self.targetRootDir = ''
 
 	def GetFilePath(self):

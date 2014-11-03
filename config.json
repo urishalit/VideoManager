@@ -1,14 +1,13 @@
 {
 	"DownloadDirectory" : "C:\\Users\\Uri\\Downloads\\Torrents\\Test\\Completed",
+	"WorkingDirectory" : "C:\\Users\\Uri\\Downloads\\Torrents\\Test\\To Sort",
 	"SubtitleLanguages" : ["eng"],
 	"ScanIntervalSec" : 10,
 	"TVShows" : {
-		"WorkingDirectory" : "C:\\Users\\Uri\\Downloads\\Torrents\\Test\\To Sort",
 		"TargetDirectory" : "C:\\Users\\Uri\\Downloads\\Torrents\\Test\\Shows",
 		"MoveFiles" : false
 	},
 	"Movies" : {
-		"WorkingDirectory" : "C:\\Users\\Uri\\Downloads\\Torrents\\Test\\Completed",
 		"TargetDirectory" : "C:\\Users\\Uri\\Downloads\\Torrents\\Test\\Movies",
 		"MoveFiles" : true	
 	},

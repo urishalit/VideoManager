@@ -3,18 +3,19 @@ import threading
 
 # My Files
 from EmailSender import SendEmail
-from EpisodeData import EpisodeData
+from VidFileData import VidFileData
+from VidFileData import VideoType
 
 mapsLock = threading.Lock()
 
-STAGING_EPISODES_TITLE = 'Pending Episodes'
-STAGING_EPISODES_CAPTION = 'The following episodes have been downloaded and are waiting to get subtitles'
+STAGING_TITLE = 'Pending VIDEOS'
+STAGING_CAPTION = 'The following VIDEOS have been downloaded and are waiting to get subtitles'
 
-READY_EPISODES_TITLE = 'Ready Episodes'
-READY_EPISODES_CAPTION = 'The following episodes are ready to watch'
+READY_TITLE = 'Ready VIDEOS'
+READY_CAPTION = 'The following VIDEOS are ready to watch'
 
-DOWNLOADED_EPISODES_TITLE = 'Newly Downloaded Episodes'
-DOWNLOADED_EPISODES_CAPTION = 'The following episodes are newly downloaded'
+DOWNLOADED_TITLE = 'Newly Downloaded VIDEOS'
+DOWNLOADED_CAPTION = 'The following VIDEOS are newly downloaded'
 
 from enum import Enum
 class NotifyFileType(Enum):
@@ -23,117 +24,147 @@ class NotifyFileType(Enum):
 	Staging = 3
 
 class Notifier:
-	def ClearAllLists(self):
-		self.data = dict()
-		for type in NotifyFileType:
-			self.data[type] = []
-		
-
 	def __init__(self, configData):
 		self.configData = configData
 		self.emailList = configData["Emails"]
-		self.data = dict()
+		self.maps = dict()
+		self.maps[VideoType.tvShow] = dict()
+		self.maps[VideoType.movie] = dict()
 		self.ClearAllLists()
 
-	def AddEpisode(self, type, epData: EpisodeData):
+	def ClearAllLists(self):
+		for vidType in VideoType:
+			self.ClearLists(vidType)
+		
+	def ClearLists(self, vidType : VideoType):
+		for notifyType in NotifyFileType:
+			self.maps[vidType][notifyType] = []
+
+	def AddFile(self, notifyType: NotifyFileType, fileData: VidFileData):
 		mapsLock.acquire()
-		# First we check if this episode has already been added to this list
+		# First we check if this video has already been added to this list
 		found = False
-		for data in self.data[type]:
-			if data.GetSeriesName() == epData.GetSeriesName() and data.GetSeason() == epData.GetSeason() and data.GetEpisodeNumber() == epData.GetEpisodeNumber():
+		for data in self.maps[fileData.GetType()][notifyType]:
+			if fileData.Equals(data):
 				found = True
 				break
 
-		# Only if it's the first time this episode is added to the list we add it.
+		# Only if it's the first time this video is added to the list we add it.
 		if not found:
-			self.data[type].append(epData)
+			self.maps[fileData.GetType()][notifyType].append(fileData)
 
 		mapsLock.release()
 
-	def RemoveEpisode(self, type, epData: EpisodeData):
+	def RemoveFile(self, notifyType: NotifyFileType,fileData: VidFileData):
 		mapsLock.acquire()
 		try:
-			self.data[type].remove(epData)
+			self.maps[fileData.GetType()][notifyType].remove(fileData)
 		except:
 			pass
 		mapsLock.release()
 
-	def AddReadyEpisode(self, epData: EpisodeData):
-		self.AddEpisode(NotifyFileType.Ready, epData)
-		self.RemoveEpisode(NotifyFileType.Staging, epData)
+	def AddReadyFile(self, fileData: VidFileData):
+		self.AddFile(NotifyFileType.Ready, fileData)
+		# In case the file is also in the staging list we remove it - as it is ready
+		self.RemoveFile(NotifyFileType.Staging, fileData)
 
-	def AddStagingEpisode(self, epData: EpisodeData):
-		self.AddEpisode(NotifyFileType.Staging, epData)
+	def AddStagingFile(self, fileData: VidFileData):
+		self.AddFile(NotifyFileType.Staging, fileData)
 
-	def AddDownloadedEpisode(self, epData: EpisodeData):
-		self.AddEpisode(NotifyFileType.Downloaded, epData)
+	def AddDownloadedFile(self, fileData: VidFileData):
+		self.AddFile(NotifyFileType.Downloaded, fileData)
 
-	def GetEpisodes(self, type):
-		return self.data[type]
+	def GetVids(self, vidType : VideoType, notifyType: NotifyFileType):
+		return self.maps[vidType][notifyType]
 
-	def GetTitleAndCaption(self, type):
-		if type is NotifyFileType.Ready:
-			return (READY_EPISODES_TITLE, READY_EPISODES_CAPTION)
-		elif type is NotifyFileType.Staging:
-			return (STAGING_EPISODES_TITLE, STAGING_EPISODES_CAPTION)
-		elif type is NotifyFileType.Downloaded:
-			return (DOWNLOADED_EPISODES_TITLE, DOWNLOADED_EPISODES_CAPTION)
+	def GetTitleAndCaption(self, vidType : VideoType, notifyType: NotifyFileType):
+		title = ''
+		caption = ''
+		if notifyType is NotifyFileType.Ready:
+			title = READY_TITLE
+			caption = READY_CAPTION
+		elif notifyType is NotifyFileType.Staging:
+			title = STAGING_TITLE
+			caption = STAGING_CAPTION
+		elif notifyType is NotifyFileType.Downloaded:
+			title = DOWNLOADED_TITLE
+			caption = DOWNLOADED_CAPTION
 		else:
-			return ()
+			raise
 
-	def GenerateContent(self, type, readyEps: list):
-		title, caption = self.GetTitleAndCaption(type)
+		vidTypeDesc = self.GetVideoTypeDescription(vidType)
+		title = title.replace("VIDEOS", vidTypeDesc)
+		caption = caption.replace("VIDEOS", vidTypeDesc)
+
+		return (title, caption)
+
+	def GenerateContent(self, vidType : VideoType, notifyType: NotifyFileType, vids: list):
+		title, caption = self.GetTitleAndCaption(vidType, notifyType)
 		content = '<p><b>' + title + ':</b><br>' + caption + '<br>'
-		for epData in readyEps:
-			content += '\t' + epData.GetNotificationText() + '<br>'
+		for fileData in vids:
+			content += '\t' + fileData.GetNotificationText() + '<br>'
 		content += '</p><br><br>'
 		return content
 
-	def GetSeriesNames(self, episodes):
+	def GetVidTitles(self, vids):
 		s = set()
-		for epData in episodes:
-			s.add(epData.GetSeriesName())
+		for fileData in vids:
+			s.add(fileData.GetNotificationTitle())
 
 		return ','.join(map(str, s))
 
-	def SendNotification(self):
+	def GetVideoTypeDescription(self, vidType : VideoType):
+		if VideoType.tvShow == vidType:
+			return "Episodes"
+		elif VideoType.movie == vidType:
+			return "Movies"
+		else:
+			return "Videos"
+
+	def SendNotification(self, vidType : VideoType):
 		# First we copy and clear the members list - we do this under lock so they won't be changed in the meantime.
 		mapsLock.acquire()
 		# If no updates to send we leave.
-		if len(self.GetEpisodes(NotifyFileType.Ready)) == 0 and len(self.GetEpisodes(NotifyFileType.Downloaded)) == 0:
+		if len(self.GetVids(vidType, NotifyFileType.Ready)) == 0 and len(self.GetVids(vidType, NotifyFileType.Downloaded)) == 0:
 			self.ClearAllLists()
 			mapsLock.release()
 			return
 
 		tmpData = dict()
 		# Copy each list asice - so we can work on it
-		for type in NotifyFileType:
-			tmpData[type] = list(self.GetEpisodes(type))
+		for notifyType in NotifyFileType:
+			tmpData[notifyType] = list(self.GetVids(vidType, notifyType))
+
 		# Clear all lists - next time we will work on new data
-		self.ClearAllLists()
+		self.ClearLists(vidType)
 		# Here we stop working on the members - so we can release the lock
 		mapsLock.release()
 		
 		subject = ''
+		vidTypeDesc = self.GetVideoTypeDescription(vidType)
 		if len(tmpData[NotifyFileType.Ready]) > 0:
-			# Generate subject according to ready episodes
-			subject = 'New Episodes Ready (' + self.GetSeriesNames(tmpData[NotifyFileType.Ready]) + ')'
+			# Generate subject according to ready video
+			subject = 'New ' + vidTypeDesc + ' Ready (' + self.GetVidTitles(tmpData[NotifyFileType.Ready]) + ')'
 		else:
-			subject = 'New Episodes Downloaded (' + self.GetSeriesNames(tmpData[NotifyFileType.Downloaded]) + ')'
+			subject = 'New ' + vidTypeDesc + ' Downloaded (' + self.GetVidTitles(tmpData[NotifyFileType.Downloaded]) + ')'
 
 		# Contnet prefix
 		content = '<html><head></head><body>'
 
 		# generate content per type
-		for type in NotifyFileType:
-			if len(tmpData[type]) > 0:
-				content += self.GenerateContent(type, tmpData[type])
+		for notifyType in NotifyFileType:
+			if len(tmpData[notifyType]) > 0:
+				content += self.GenerateContent(vidType, notifyType, tmpData[notifyType])
 
 		# Contnet suffix
 		content += '</body></html>'
 
 		for email in self.emailList:
 			SendEmail(email, subject, content, 'html')
-			print('---- Notification email sent to ' + email)
+			print('---- ' + vidTypeDesc + ' notification email sent to ' + email)
+
+	def SendNotifications(self):
+		self.SendNotification(VideoType.tvShow)
+		self.SendNotification(VideoType.movie)
 
 

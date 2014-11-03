@@ -3,7 +3,6 @@ import os
 from enum import Enum
 
 class VideoType(Enum):
-	unknown = 0
 	tvShow = 1
 	movie = 2
 
@@ -16,7 +15,6 @@ class VidFileData:
 		self.associatedFiles = []
 		self.associatedFiles.insert(0, self.GetFilePath())
 		self.baseFileName = os.path.basename(self.fileName)
-		self.type = VideoType.unknown
 		self.workingDir = configData["WorkingDirectory"]
 		self.targetRootDir = ''
 
@@ -68,6 +66,9 @@ class VidFileData:
 		return self.type
 
 	def GetNotificationText(self):
+		raise NotImplemented
+		
+	def GetNotificationTitle(self):
 		raise NotImplemented
 
 	def RenameToFormat(self):
@@ -124,3 +125,7 @@ class VidFileData:
 				os.rename(file, targetFilePath)
 			else:
 				os.remove(file)
+
+	def Equals(otherFileData):
+		return self.fileDir == otherFileData.fileDir and self.fileName == otherFileData.fileName
+

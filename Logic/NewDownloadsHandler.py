@@ -66,7 +66,9 @@ class NewDownloadsHandler(IFileChangeRecipient):
 		try:
 			print('-- Worker Thread initiated --')
 			workersLock.acquire()
-
+			# Update directory listing of files
+			self.InitDir()
+			
 			if self.workingDir != self.downloadDir:
 				newPath = os.path.join(self.workingDir, os.path.basename(path))
 				print('---- Copying ' + path + ' to ' + newPath)

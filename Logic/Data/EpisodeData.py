@@ -26,6 +26,9 @@ class EpisodeData(VidFileData):
 	def GetNotificationText(self):
 		return self.GetSeriesName() + ' - S' + self.season + 'E' + self.episode
 
+	def GetNotificationTitle(self):
+		return self.GetSeriesName()
+		
 	def RenameToFormat(self):
 		# Construct new file name
 		newFile = self.series.replace(" ", ".") + "." + "S" + self.season + "E" + self.episode + self.suffix + self.GetVidExtension();

@@ -43,9 +43,9 @@ class VideoOrganizer(IVideoOrganizer):
 		# Make sure TV file is up to format
 		vidFileData.RenameToFormat()
 
-		#if isNewDownload:
+		if isNewDownload:
 			# This should happen only once per video
-			#self.notifier.AddDownloadedEpisode(vidFileData)
+			self.notifier.AddDownloadedFile(vidFileData)
 
 		# Download subtitles for TV show
 		result = self.subtitleManager.DownloadSubtitles(vidFileData)
@@ -53,10 +53,10 @@ class VideoOrganizer(IVideoOrganizer):
 			# Move files and associates to proper location
 			vidFileData.MoveToTargetDirectory()
 			# Add to Notifier as ready episode
-			#self.notifier.AddReadyEpisode(vidFileData)
-		#else:
+			self.notifier.AddReadyFile(vidFileData)
+		else:
 			# Add to Notifier as in staging episode
-			#self.notifier.AddStagingEpisode(vidFileData)
+			self.notifier.AddStagingFile(vidFileData)
 
 	def ScanThread(self):
 		try:
@@ -69,7 +69,7 @@ class VideoOrganizer(IVideoOrganizer):
 				self.Process(os.path.join(self.workingDir, file))
 
 			# Send Notification (email) if there is any new news to update
-			self.notifier.SendNotification()
+			self.notifier.SendNotifications()
 			
 			# Schedule the next scan
 			self.scanThread = Timer(self.scanIntervalSec, self.ScanThread)
@@ -94,7 +94,7 @@ class VideoOrganizer(IVideoOrganizer):
 	def ScanDir(self):
 		print('-- Scanning Directory ' + self.workingDir)
 		self.Process(self.workingDir)
-		self.notifier.SendNotification()
+		self.notifier.SendNotifications()
 		print('-- Scan completed.')
 
 	def Start(self):

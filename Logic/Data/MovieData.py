@@ -22,6 +22,9 @@ class MovieData(VidFileData):
 	def GetNotificationText(self):
 		text = self.title
 		if len(self.year) > 0:
-			text += '(' + self.year + ')'
+			text += ' (' + self.year + ')'
 
 		return text
+
+	def GetNotificationTitle(self):
+		return self.GetMovieTitle()

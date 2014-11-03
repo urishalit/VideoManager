@@ -3,7 +3,7 @@ import os.path
 
 # My Files
 from SubDB import SubDB
-from EpisodeData import EpisodeData
+from VidFileData import VidFileData
 from SubDownloader import SubDownloader
 from OpenSubtitles import OpenSubtitles
 
@@ -14,7 +14,7 @@ class SubtitleManager:
 		#self.downloaders = [OpenSubtitles(), SubDB()]
 		self.downloaders = [OpenSubtitles()]
 		
-	def DownloadTVSubtitles(self, epData: EpisodeData):
+	def DownloadSubtitles(self, fileData: VidFileData):
 		print('------ Attempting to download subtitles')
 		langs = list(self.langauges)
 		# If no langauges configured skipping this phase
@@ -28,14 +28,14 @@ class SubtitleManager:
 			if isinstance(downloader, SubDownloader):
 				for lang in langs:
 					# If exists already a subtitle file for this language - we skip it.
-					subPath = downloader.GetSubtitleFilePath(epData, lang)
+					subPath = downloader.GetSubtitleFilePath(fileData, lang)
 					if (os.path.exists(subPath)):
 						foundLangs.append(lang)
-						epData.AddAssociatedFile(subPath)
+						fileData.AddAssociatedFile(subPath)
 						continue
 
 					# Attempt downloading subtitle for language
-					res = downloader.DownloadSubs(epData, lang)
+					res = downloader.DownloadSubs(fileData, lang)
 					if res == True:
 						foundLangs.append(lang)
 

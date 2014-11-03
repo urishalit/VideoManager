@@ -12,6 +12,7 @@ CMD_ARG_FOLDER			= "folder"
 CMD_ARG_DOWNLOAD_DIR	= "downloaddir"
 CMD_ARG_WORKING_DIR		= "workingdir"
 CMD_ARG_SHOWS_DIR		= "showsdir"
+CMD_ARG_MOVIES_DIR		= "moviesdir"
 
 # Email
 CMD_ARG_NO_EMAIL		= "noemail"

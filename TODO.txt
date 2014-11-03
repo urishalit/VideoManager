@@ -1,13 +1,18 @@
+Refactor VideoOrganizer to work with different working directories for Movies and Shows
+Add moviesdir command line arg
+Refactor Notifier for movies
+OpeneSubtitles - update name of movie/show accroding to result (unmark and refactor current code)
 Verify logics of file already exist work
 Do not copy movies to tv show working dir
 limit number of threads open
 When overiding series name from opensubtitles - check similarity...
 Add ConfigHelp
 Fix remove directory to always wortk in VideoOrganizer::Process
+In Notification email link to imdb for the movie
+Formats fopr target directory (SERIES\Season SEASON\ or MOVIEYEAR\)
 
 Other subtitle sites
 Handle languages format
-Handle if the same episode is downloaded twice in different formats (Person of Interest 4x04)
 Debug Logger (color by Thread)
 
 System icon with start/stop

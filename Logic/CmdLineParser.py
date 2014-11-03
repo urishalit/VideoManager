@@ -66,8 +66,11 @@ def DisplayHelp():
 	print('          \t\tin this directory until they are ready with subs - and')
 	print('          \t\tthen moved to the matching directory')
 	print('')
-	print('   -showsdir=\t\tThe root folder to place files that are ready to watch')
-	print('          \t\t(renamed and subtitles ready).')
+	print('   -showsdir=\t\tThe root folder to place episodes that are ready to')
+	print('          \t\twatch (renamed and with subtitles).')
+	print('')
+	print('   -moviesdir=\t\tThe root folder to place movies that are ready to')
+	print('          \t\twatch (renamed and with subtitles).')
 	print('')
 	print('   -noemails=\t\tSet no emails to be set. If there is a config file')
 	print('          \t\tpresent with emails - this will override it.')
@@ -153,12 +156,19 @@ def ParseCmdLine():
 	# Add the action to the configData
 	configData['action'] = action
 
+	# Initiate directories to blank
+	downloadDir = ''
+	workingDir = ''
+	showsDir = ''
+	moviesDir = ''
+
 	# Given the folder argument all directories will be set by default to this folder
 	folder = GetParameterValue(CMD_ARG_FOLDER)
 	if len(folder) > 0:
 		downloadDir = folder
 		workingDir = folder
 		showsDir = folder
+		moviesDir = folder
 
 	# Check if there is a download directory to override the one in the config file
 	downloadDir = GetParameterValue(CMD_ARG_DOWNLOAD_DIR, downloadDir)
@@ -168,13 +178,18 @@ def ParseCmdLine():
 	# Check if there is a working directory to override the one in the config file
 	workingDir = GetParameterValue(CMD_ARG_WORKING_DIR, workingDir)
 	if len(workingDir) > 0:
-		configData["WorkingDirectory"] = workingDir
+		configData["TVShows"]["WorkingDirectory"] = workingDir
+		configData["Movies"]["WorkingDirectory"] = workingDir
 
 	# Check if there is a shows target directory to override the one in the config file
 	showsDir = GetParameterValue(CMD_ARG_SHOWS_DIR, showsDir)
 	if len(showsDir) > 0:
-		print(showsDir)
 		configData["TVShows"]["TargetDirectory"] = showsDir
+
+	# Check if there is a shows target directory to override the one in the config file
+	moviesDir = GetParameterValue(CMD_ARG_MOVIES_DIR, moviesDir)
+	if len(moviesDir) > 0:
+		configData["Movies"]["TargetDirectory"] = moviesDir
 
 	noemails = GetParameterValue(CMD_ARG_NO_EMAIL, False, '-', '')
 	emails = GetParameterValue(CMD_ARG_EMAILS)

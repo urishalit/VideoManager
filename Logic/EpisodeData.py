@@ -1,18 +1,20 @@
 import os.path
 import os
 
-class EpisodeData:
-	def __init__(self, series, season, episode, fileDir, fileName, suffix):
-		self.series = series
-		self.season = season
-		self.episode = episode
-		self.fileDir = fileDir
-		self.fileName = fileName
-		self.suffix = suffix
-		self.associatedFiles = []
-		self.associatedFiles.insert(0, self.GetFilePath())
-		self.baseFileName = os.path.basename(self.fileName)
+#My Files
+from VidFileData import VidFileData
+from VidFileData import VideoType
 
+class EpisodeData(VidFileData):
+	def __init__(self, configData, series, season, episode, fileDir, fileName, suffix):
+		VidFileData.__init__(self, configData, fileDir, fileName, suffix)
+		self.series = str(series)
+		self.season = "%02d" % (season,)
+		self.episode = "%02d" % (episode,)
+		self.type = VideoType.tvShow
+		self.workingDir = self.configData["TVShows"]["WorkingDirectory"]
+		self.InitiateTargetDirectory(configData["TVShows"]["TargetDirectory"])
+		
 	def GetSeriesName(self):
 		return self.series.replace(".", " ")
 
@@ -22,40 +24,18 @@ class EpisodeData:
 	def GetEpisodeNumber(self):
 		return str(int(self.episode))
 		
-	def GetFilePath(self):
-		return os.path.abspath(os.path.join(self.fileDir, self.fileName))
+	def GetNotificationText(self):
+		return self.GetSeriesName() + ' - S' + self.season + 'E' + self.episode
 
-	def GetVidExtension(self):
-		return os.path.splitext(self.fileName)[1]
+	def RenameToFormat(self):
+		# Construct new file name
+		newFile = self.series.replace(" ", ".") + "." + "S" + self.season + "E" + self.episode + self.suffix + self.GetVidExtension();
 
-	def AddAssociatedFile(self, path):
-		self.associatedFiles.append(path)
+		self.RenameFile(self.fileDir, newFile)
 
-	def RenameFile(self, dir, file):
-		# Current path
-		currPath = self.GetFilePath()
+	def MoveToTargetDirectory(self):
+		# Construct Target Dir - RootDir\Series\Season X
+		targetPath = os.path.join(self.targetRootDir, self.GetSeriesName(), "Season " + self.GetSeason())
+		
+		self.MoveToDir(targetPath)
 
-		# Remove current path from list of associated files
-		self.associatedFiles = list(set(self.associatedFiles) - set([currPath]))
-
-		# Update dir & file name
-		self.fileDir = dir
-		self.fileName = file
-
-		# Add file to associated files list
-		self.AddAssociatedFile(self.GetFilePath())
-
-		# Rename file
-		os.rename(currPath, self.GetFilePath())
-
-	def AddSuffixToFiles(self, suffix):
-		newAssociatedFileList = []
-		newBaseName = os.path.splitext(self.baseFileName)[0] + str(suffix)
-
-		currBaseName = os.path.splitext(os.path.basename(self.fileName))[0]
-		for file in self.associatedFiles:
-			newFile = file.replace(currBaseName, newBaseName)
-			newAssociatedFileList.append(newFile)
-
-		self.fileName = newBaseName + os.path.splitext(os.path.basename(self.fileName))[1]
-		self.associatedFiles = newAssociatedFileList

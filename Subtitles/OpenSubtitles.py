@@ -1,4 +1,4 @@
-from EpisodeData import EpisodeData
+from VidFileData import VidFileData
 import os.path
 import hashlib
 import os
@@ -75,12 +75,12 @@ class OpenSubtitles(SubDownloader):
 			pass
 
 
-	def SearchSubs(self, epData: EpisodeData, lang):
+	def SearchSubs(self, fileData: VidFileData, lang):
 		# Get episode hash
-		epHash = self.get_hash(epData.GetFilePath())
+		epHash = self.get_hash(fileData.GetFilePath())
 
 		# Get file byte size
-		fileSizeBytes = os.path.getsize(epData.GetFilePath())
+		fileSizeBytes = os.path.getsize(fileData.GetFilePath())
 		#strfileSizeBytes = str(fileSizeBytes)
 		
 		searchResults = self.osProxy.SearchSubtitles(self.token, [{'moviehash': epHash, 'moviebytesize': str(fileSizeBytes), 'sublanguageid' :lang}])
@@ -97,13 +97,13 @@ class OpenSubtitles(SubDownloader):
 
 		return data
 
-	def DownloadSubtitle(self, epData: EpisodeData, lang, searchResults):
+	def DownloadSubtitle(self, fileData: VidFileData, lang, searchResults):
 		for searchResult in searchResults:
 
 			# Verify we have the correct series name
-			episodeName = searchResult['MovieName']
-			seriesName = episodeName[1:episodeName.rfind('"')]
-			epData.series = seriesName
+			#episodeName = searchResult['MovieName']
+			#seriesName = episodeName[1:episodeName.rfind('"')]
+			#epData.series = seriesName
 
 			# Get the subtitle Id
 			IDSubtitleFile = searchResult['IDSubtitleFile']
@@ -125,7 +125,7 @@ class OpenSubtitles(SubDownloader):
 			gzipData = base64.standard_b64decode(base64Data)
 
 			# We write the gzip data to a file
-			tmpFile = os.path.join(epData.fileDir, os.path.basename(epData.fileName) + '.srt.gzip')
+			tmpFile = os.path.join(fileData.fileDir, os.path.basename(fileData.fileName) + '.srt.gzip')
 			fh = open(tmpFile, "wb")
 			fh.write(gzipData)
 			fh.close()
@@ -139,14 +139,14 @@ class OpenSubtitles(SubDownloader):
 			os.remove(tmpFile)
 
 			# And finally we have the raw data of the subtitle and save it to a subtitle file
-			self.SaveSubtitleFile(epData, lang, subData)
+			self.SaveSubtitleFile(fileData, lang, subData)
 
 			return True
 
 		return False
 
 
-	def DownloadSubs(self, epData: EpisodeData, lang):
+	def DownloadSubs(self, fileData: VidFileData, lang):
 		try:		
 			# Connect
 			self.Connect()
@@ -160,7 +160,7 @@ class OpenSubtitles(SubDownloader):
 
 		try:	
 			# Search subtitles for the movie/show
-			searchResults = self.SearchSubs(epData, lang)
+			searchResults = self.SearchSubs(fileData, lang)
 
 			# If no subtitles found we exit
 			if searchResults == None:
@@ -168,21 +168,21 @@ class OpenSubtitles(SubDownloader):
 				return False
 
 			if len(searchResults) == 0:
-				print("------ ERROR: Unexpected error - no subtitles although it suceeded " + epData.fileName)
+				print("------ ERROR: Unexpected error - no subtitles although it suceeded " + fileData.fileName)
 				self.LogOut()
 				return False
 
 			# Download the subtitle
-			result = self.DownloadSubtitle(epData, lang, searchResults)
+			result = self.DownloadSubtitle(fileData, lang, searchResults)
 			if False == result:
-				print("------ ERROR: Failed to download subtitles for " + epData.fileName)
+				print("------ ERROR: Failed to download subtitles for " + fileData.fileName)
 				self.LogOut()
 				return False			
 
 			self.LogOut()
 			return True
 		except:
-			print("------ ERROR: Exception raised while downloading from Open Subtitles (" + epData.fileName + ")")
+			print("------ ERROR: Exception raised while downloading from Open Subtitles (" + fileData.fileName + ")")
 			traceback.print_exc(file=sys.stdout)
 			print('-' * 60)
 			self.LogOut()

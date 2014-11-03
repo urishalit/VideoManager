@@ -8,13 +8,14 @@ from threading import Thread
 from threading import Timer
 import threading
 
+
 # My Files
 from EpisodeData import EpisodeData
 from SubtitleManager import SubtitleManager
-from TVManager import TVManager
 from Notifier import Notifier
 from FileListener import *
 from CmdLineConsts import *
+from VidFileDataFactory import GetVidFileData
 
 # Known vid extensions
 vidExtenstions = ['.avi','.mkv','.mp4']
@@ -28,11 +29,28 @@ class VideoOrganizer(IFileChangeRecipient):
 		ext = os.path.splitext(file)[1]
 		return ext in vidExtenstions
 
+	def GetWordDelimiter(self, baseName):
+		firstDot = baseName.find('.')
+		if firstDot < 0:
+			firstDot = len(baseName)
+
+		firstSpace = baseName.find(' ')
+		if firstSpace < 0:
+			firstSpace = len(baseName)
+
+		if firstDot < firstSpace:
+			return '.'
+		elif firstSpace < firstDot:
+			return ' '
+		else:
+			return ''
+
 	def CaptalizeFirstLetters(self, dir, file):
 		ext = os.path.splitext(file)[1]
 		base = os.path.splitext(file)[0]
 
-		newBase = string.capwords(base, '.')
+		delim = self.GetWordDelimiter(base)
+		newBase = string.capwords(base, delim)
 
 		src = os.path.abspath(os.path.join(dir, file))
 		trgt = os.path.abspath(os.path.join(dir, newBase + ext))
@@ -41,35 +59,37 @@ class VideoOrganizer(IFileChangeRecipient):
 
 		return newBase + ext
 
-	def OrganizeVideo(self, dir, file, isNewDownload):
+	def ProcessVideo(self, dir, file, isNewDownload):
 		print("---- Working on " + file)
-		if self.isVidFile(file):
-			# Capitize First letters of every word
-			file = self.CaptalizeFirstLetters(dir, file)
-			# Parse episode data & rename file to proper format 
-			epData = self.tvManager.IsTVEpisode(dir, file)
-			if epData != None:
-				# Make sure TV file is up to format
-				self.tvManager.RenameToFormat(epData)
+		# First check if this is actually a video file
+		if not self.isVidFile(file):
+			print("---- Not supporting movie files yet: " + file)
+			return
 
-				if isNewDownload:
-					# This should happen only once per video
-					self.notifier.AddDownloadedEpisode(epData)
+		# Capitize First letters of every word
+		file = self.CaptalizeFirstLetters(dir, file)
 
-				# Download subtitles for TV show
-				result = self.subtitleManager.DownloadTVSubtitles(epData)
-				if result == True:
-					# Move files and associates to proper location
-					self.tvManager.MoveToShowsDirectory(epData)
-					# Add to Notifier as ready episode
-					self.notifier.AddReadyEpisode(epData)
-				else:
-					# Add to Notifier as in staging episode
-					self.notifier.AddStagingEpisode(epData)
+		# Parse the infomrmation from the file name and return an object representing it.
+		vidFileData = GetVidFileData(dir, file, self.configData)
 
-			else:
-				print("---- Not supporting movie files yet: " + file)
-				return
+		# Make sure TV file is up to format
+		vidFileData.RenameToFormat()
+
+		#if isNewDownload:
+			# This should happen only once per video
+			#self.notifier.AddDownloadedEpisode(vidFileData)
+
+		# Download subtitles for TV show
+		result = self.subtitleManager.DownloadSubtitles(vidFileData)
+		if result == True:
+			# Move files and associates to proper location
+			vidFileData.MoveToTargetDirectory()
+			# Add to Notifier as ready episode
+			#self.notifier.AddReadyEpisode(vidFileData)
+		#else:
+			# Add to Notifier as in staging episode
+			#self.notifier.AddStagingEpisode(vidFileData)
+
 
 	def Process(self, path, isNewDownload=False, removeDir=True):
 		if os.path.isdir(path):
@@ -86,7 +106,7 @@ class VideoOrganizer(IFileChangeRecipient):
 						except:
 							print('---- Failed removing directory ' + path)
 		else:
-			self.OrganizeVideo(os.path.dirname(path), os.path.basename(path), isNewDownload)
+			self.ProcessVideo(os.path.dirname(path), os.path.basename(path), isNewDownload)
 
 	def WorkerThread(self, path):
 		try:
@@ -201,8 +221,7 @@ class VideoOrganizer(IFileChangeRecipient):
 	def __init__(self, configData):
 		self.configData = configData
 		self.subtitleManager = SubtitleManager(configData)
-		self.tvManager = TVManager(configData)
-		self.workingDir = configData["WorkingDirectory"]
+		self.workingDir = configData["TVShows"]["WorkingDirectory"]
 		self.downloadDir = configData["DownloadDirectory"]
 		self.scanIntervalSec = configData["ScanIntervalSec"]
 		self.notifier = Notifier(configData)

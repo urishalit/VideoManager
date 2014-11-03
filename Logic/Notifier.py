@@ -85,7 +85,7 @@ class Notifier:
 		title, caption = self.GetTitleAndCaption(type)
 		content = '<p><b>' + title + ':</b><br>' + caption + '<br>'
 		for epData in readyEps:
-			content += '\t' + epData.GetSeriesName() + ' - S' + epData.season + 'E' + epData.episode + '<br>'
+			content += '\t' + epData.GetNotificationText() + '<br>'
 		content += '</p><br><br>'
 		return content
 

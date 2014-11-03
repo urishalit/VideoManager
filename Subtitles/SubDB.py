@@ -1,5 +1,5 @@
 from httplib2 import Http
-from EpisodeData import EpisodeData
+from VidFileData import VidFileData
 import os.path
 import hashlib
 import os
@@ -21,12 +21,12 @@ class SubDB(SubDownloader):
 	        data += f.read(readsize)
 	    return hashlib.md5(data).hexdigest()
 
-	def DownloadSubs(self, epData: EpisodeData, lang):
+	def DownloadSubs(self, fileData: VidFileData, lang):
 		# Start an http object
 		h = Http()
 
 		# Get episode hash
-		epHash = self.get_hash(epData.GetFilePath())
+		epHash = self.get_hash(fileData.GetFilePath())
 
 		# Construct Url
 		url = SubDBUrl_Search.replace('HASH_ALIAS', epHash)
@@ -52,7 +52,7 @@ class SubDB(SubDownloader):
 			return False
 
 		# Save the subtitle file
-		self.SaveSubtitleFile(epData, lang, content)
+		self.SaveSubtitleFile(fileData, lang, content)
 
 		return True
 

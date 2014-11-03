@@ -1,20 +1,20 @@
 
 import os.path
-from EpisodeData import EpisodeData
+from VidFileData import VidFileData
 
 SearchLanguages = ['en']
 
 class SubDownloader:
-	def GetSubtitleFilePath(self, epData: EpisodeData, lang):
-		srtFile = os.path.join(epData.fileDir, epData.fileName[:epData.fileName.rfind('.')] + "-" + lang + ".srt")
+	def GetSubtitleFilePath(self, fileData: VidFileData, lang):
+		srtFile = os.path.join(fileData.fileDir, fileData.fileName[:fileData.fileName.rfind('.')] + "-" + lang + ".srt")
 		return srtFile
 
-	def DownloadSubs(self, epData: EpisodeData, lang):
+	def DownloadSubs(self, fileData: VidFileData, lang):
 		return self.GetLanguages()
 
-	def SaveSubtitleFile(self, epData: EpisodeData, lang, content):
+	def SaveSubtitleFile(self, fileData: VidFileData, lang, content):
 		# Construct sub file path
-		subFilePath = self.GetSubtitleFilePath(epData, lang)
+		subFilePath = self.GetSubtitleFilePath(fileData, lang)
 
 		# Save subtitle to file
 		subFile = open(subFilePath, 'wb')
@@ -22,4 +22,4 @@ class SubDownloader:
 		subFile.close()
 
 		# Add to associated files
-		epData.AddAssociatedFile(subFilePath)
+		fileData.AddAssociatedFile(subFilePath)

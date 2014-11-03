@@ -1,13 +1,11 @@
-Refactor Notifier for movies
-OpeneSubtitles - update name of movie/show accroding to result (unmark and refactor current code)
-Verify logics of file already exist work
-Do not copy movies to tv show working dir
-limit number of threads open
+OpenSubtitles - update name of movie/show accroding to result (unmark and refactor current code)
 When overiding series name from opensubtitles - check similarity...
+Verify logics of file already exist work
+limit number of threads open
 Add ConfigHelp
 Add remove directory to  VideoOrganizer::Process when needed
 In Notification email link to imdb for the movie
-Formats fopr target directory (SERIES\Season SEASON\ or MOVIEYEAR\)
+Formats for target directory (SERIES\Season SEASON\ or MOVIEYEAR\)
 
 Other subtitle sites
 Handle languages format

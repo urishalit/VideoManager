@@ -52,7 +52,7 @@ class Notifier:
 		# Only if it's the first time this video is added to the list we add it.
 		if not found:
 			self.maps[fileData.GetType()][notifyType].append(fileData)
-
+		
 		mapsLock.release()
 
 	def RemoveFile(self, notifyType: NotifyFileType,fileData: VidFileData):
@@ -126,7 +126,7 @@ class Notifier:
 		mapsLock.acquire()
 		# If no updates to send we leave.
 		if len(self.GetVids(vidType, NotifyFileType.Ready)) == 0 and len(self.GetVids(vidType, NotifyFileType.Downloaded)) == 0:
-			self.ClearAllLists()
+			self.ClearLists(vidType)
 			mapsLock.release()
 			return
 
@@ -158,7 +158,6 @@ class Notifier:
 
 		# Contnet suffix
 		content += '</body></html>'
-
 		for email in self.emailList:
 			SendEmail(email, subject, content, 'html')
 			print('---- ' + vidTypeDesc + ' notification email sent to ' + email)

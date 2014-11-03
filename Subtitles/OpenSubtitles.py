@@ -99,7 +99,6 @@ class OpenSubtitles(SubDownloader):
 
 	def DownloadSubtitle(self, fileData: VidFileData, lang, searchResults):
 		for searchResult in searchResults:
-
 			# Verify we have the correct series name
 			#episodeName = searchResult['MovieName']
 			#seriesName = episodeName[1:episodeName.rfind('"')]
@@ -116,6 +115,9 @@ class OpenSubtitles(SubDownloader):
 			if status != '200 OK':
 				continue;
 
+			# Update teh video file with the IMDB Id
+			fileData.imdbTitleId = searchResult['IDMovieImdb']
+			
 			# The data is returned in base64 format
 			base64Data = ''
 			if len(downloadResult['data']) > 0:

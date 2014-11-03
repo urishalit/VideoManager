@@ -20,9 +20,11 @@ class MovieData(VidFileData):
 		return self.year
 
 	def GetNotificationText(self):
-		text = self.title
+		text = '<a href=\"http://www.imdb.com/title/tt' + str(self.imdbTitleId) + '\" target=\"_blank\">' + self.title
 		if len(self.year) > 0:
 			text += ' (' + self.year + ')'
+		
+		text += '</a>'
 
 		return text
 

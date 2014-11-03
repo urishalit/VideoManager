@@ -17,6 +17,7 @@ class VidFileData:
 		self.baseFileName = os.path.basename(self.fileName)
 		self.workingDir = configData["WorkingDirectory"]
 		self.targetRootDir = ''
+		self.imdbTitleId = ''
 
 	def GetFilePath(self):
 		return os.path.abspath(os.path.join(self.fileDir, self.fileName))
@@ -67,7 +68,7 @@ class VidFileData:
 
 	def GetNotificationText(self):
 		raise NotImplemented
-		
+
 	def GetNotificationTitle(self):
 		raise NotImplemented
 

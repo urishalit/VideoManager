@@ -20,12 +20,25 @@ class MovieData(VidFileData):
 		return self.year
 
 	def GetNotificationText(self):
-		text = '<a href=\"http://www.imdb.com/title/tt' + str(self.imdbTitleId) + '\" target=\"_blank\">' + self.title
+		if len(self.imdbTitleId)) > 0:
+			return self.GenerateLinkText()
+		else:
+			return self.GeneratePlainText()
+
+	def GenerateLinkText(self):
+		text = '<a href=\"http://www.imdb.com/title/tt'
+		text += str(self.imdbTitleId)
+		text += '\" target=\"_blank\">'
+		text += self.GeneratePlainText()
+		text += '</a>'
+
+		return text
+
+	def GeneratePlainText(self):
+		text = self.title
 		if len(self.year) > 0:
 			text += ' (' + self.year + ')'
 		
-		text += '</a>'
-
 		return text
 
 	def GetNotificationTitle(self):

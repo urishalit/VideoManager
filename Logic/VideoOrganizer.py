@@ -5,6 +5,7 @@ import string
 import time
 import traceback
 import sys
+import shutil
 from threading import Thread
 from threading import Timer
 
@@ -67,6 +68,16 @@ class VideoOrganizer(IVideoOrganizer):
 
 			# Scan all files in working dir and see if we can make any ready
 			for file in os.listdir(self.workingDir):
+				path = os.path.join(self.workingDir, file)
+				if os.path.isdir(path):
+					# If it is a directory we check if it is empty - if it is - we delete it.
+					if len(os.listdir(path)) == 0:
+						# If the file is read only we remove the read only flag as we are about to delete it
+						if not os.access(path, os.W_OK):
+							os.chmod(path, stat.S_IWUSR)
+						# Remove it
+						shutil.rmtree(path)
+				# Process the file/directory
 				self.Process(os.path.join(self.workingDir, file))
 
 			# Send Notification (email) if there is any new news to update

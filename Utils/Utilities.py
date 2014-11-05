@@ -1,8 +1,11 @@
 import os, os.path
 import string
+import stat
 
 # Known vid extensions
 vidExtenstions = ['.avi','.mkv','.mp4']
+
+MIN_VID_SIZE_BYTE = 2000000
 
 def IsVidFile(file):
 	ext = os.path.splitext(file)[1]
@@ -37,3 +40,30 @@ def CaptalizeFirstLetters(dir, file):
 	os.rename(src, trgt)
 
 	return newBase + ext
+
+def RemoveNonVideoFilesFromDir(path):
+	remove = False
+	if not os.path.isdir(path):
+		if not IsVidFile(path):
+			remove = True
+		if os.path.getsize(path) < MIN_VID_SIZE_BYTE:
+			remove = True
+	else:
+		files = os.listdir(path)
+		for file in files:
+			filePath = os.path.join(path, file)
+			# Attempt removing non video files from path
+			RemoveNonVideoFilesFromDir(filePath)
+		# If the directory is empty we remove it
+		if len(os.listdir(path)) == 0:
+			remove = True
+
+	if remove:
+		# If the file is read only we remove the read only flag as we are about to delete it
+		if not os.access(path, os.W_OK):
+			os.chmod(path, stat.S_IWUSR)
+		# Remove it
+		if os.path.isdir(path):
+			shutil.rmtree(path)
+		else:
+			os.remove(path)

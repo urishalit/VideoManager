@@ -2,7 +2,6 @@ import os
 import os.path
 import json
 import string
-import shutil
 import time
 import traceback
 import sys

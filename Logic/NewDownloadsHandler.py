@@ -4,12 +4,14 @@ import pickle
 import shutil
 import traceback
 from threading import Thread
+import sys
 
 # My Files
 from VidFileData import VidFileData
 from FileListener import IFileChangeRecipient
 from FileListener import FileListener
 from LogicDefs import *
+from Utilities import *
 
 # Name of file to save image of files in Download directory
 DOWNLOAD_DIR_DILES_LIST_FILE_NAME = 'DownloadDirFiles'
@@ -62,18 +64,21 @@ class NewDownloadsHandler(IFileChangeRecipient):
 		# Save the current image of the files
 		self.SaveDownloadDirFileList(currFiles)
 
+
 	def WorkerThread(self, path):
 		try:
 			print('-- Worker Thread initiated --')
 			workersLock.acquire()
 			# Update directory listing of files
 			self.InitDir()
-			
+
+			newPath = os.path.join(self.workingDir, os.path.basename(path))
 			if self.workingDir != self.downloadDir:
 				newPath = os.path.join(self.workingDir, os.path.basename(path))
 				print('---- Copying ' + path + ' to ' + newPath)
 				if os.path.isdir(path):
 					shutil.copytree(path, newPath)
+					RemoveNonVideoFilesFromDir(newPath)
 				elif os.path.isfile(path):
 					shutil.copyfile(path, newPath)	
 			else:

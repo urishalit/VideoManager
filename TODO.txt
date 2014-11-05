@@ -15,6 +15,5 @@ System icon with start/stop
 UI for config
 In UI - tab to Scan Now specific folder
 Different file name formats
-Handle Movies
 Handle MoveFiles flag
 

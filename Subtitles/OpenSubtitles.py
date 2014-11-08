@@ -84,6 +84,9 @@ class OpenSubtitles(SubDownloader):
 		#strfileSizeBytes = str(fileSizeBytes)
 		
 		searchResults = self.osProxy.SearchSubtitles(self.token, [{'moviehash': epHash, 'moviebytesize': str(fileSizeBytes), 'sublanguageid' :lang}])
+		if not isinstance(searchResults, dict):
+			print('------ ERROR: Open Subtitles bad response.')
+			return None
 
 		# Check status
 		status = searchResults['status']

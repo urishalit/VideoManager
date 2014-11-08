@@ -20,7 +20,7 @@ class MovieData(VidFileData):
 		return self.year
 
 	def GetNotificationText(self):
-		if len(self.imdbTitleId)) > 0:
+		if len(self.imdbTitleId) > 0:
 			return self.GenerateLinkText()
 		else:
 			return self.GeneratePlainText()

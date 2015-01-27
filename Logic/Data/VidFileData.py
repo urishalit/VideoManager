@@ -4,6 +4,7 @@ import shutil
 import stat
 
 from enum import Enum
+from FileSecurity import AddFullAccessToFile
 
 class VideoType(Enum):
 	tvShow = 1
@@ -131,8 +132,12 @@ class VidFileData:
 
 			if moveFiles:
 				shutil.move(file, targetFilePath)
+				AddFullAccessToFile(targetFilePath)
 			else:
 				os.remove(file)
+
+
+
 
 	def Equals(self, otherFileData):
 		return self.fileDir == otherFileData.fileDir and self.fileName == otherFileData.fileName

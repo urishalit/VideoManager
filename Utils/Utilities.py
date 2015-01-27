@@ -1,6 +1,7 @@
 import os, os.path
 import string
 import stat
+import shutil 
 
 # Known vid extensions
 vidExtenstions = ['.avi','.mkv','.mp4']

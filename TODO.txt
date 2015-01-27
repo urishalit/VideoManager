@@ -1,3 +1,4 @@
+Add Language command line argument
 OpenSubtitles - update name of movie/show accroding to result (unmark and refactor current code)
 When overiding series name from opensubtitles - check similarity...
 Verify logics of file already exist work

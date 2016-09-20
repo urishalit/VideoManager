@@ -73,7 +73,6 @@ class NewDownloadsHandler(IFileChangeRecipient):
 	def WorkerThread(self, path):
 		try:
 			if not self.run:
-				print('NewDownloadsHandler exiting')
 				return
 
 			print('-- Worker Thread initiated --')

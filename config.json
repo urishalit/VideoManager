@@ -1,14 +1,14 @@
 {
-	"DownloadDirectory" : "C:\\Users\\Uri\\Downloads\\Torrents\\Test\\Completed",
-	"WorkingDirectory" : "C:\\Users\\Uri\\Downloads\\Torrents\\Test\\To Sort",
+	"DownloadDirectory" : "C:\\Users\\Urish\\Downloads\\Torrents\\Test\\Completed",
+	"WorkingDirectory" : "C:\\Users\\Urish\\Downloads\\Torrents\\Test\\To Sort",
 	"SubtitleLanguages" : ["eng"],
 	"ScanIntervalSec" : 10,
 	"TVShows" : {
-		"TargetDirectory" : "C:\\Users\\Uri\\Downloads\\Torrents\\Test\\Shows",
+		"TargetDirectory" : "C:\\Users\\Urish\\Downloads\\Torrents\\Test\\Shows",
 		"MoveFiles" : false
 	},
 	"Movies" : {
-		"TargetDirectory" : "C:\\Users\\Uri\\Downloads\\Torrents\\Test\\Movies",
+		"TargetDirectory" : "C:\\Users\\Urish\\Downloads\\Torrents\\Test\\Movies",
 		"MoveFiles" : true	
 	},
 	"Emails" : ["urishalit@gmail.com"]

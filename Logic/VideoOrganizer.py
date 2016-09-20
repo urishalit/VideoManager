@@ -61,6 +61,8 @@ class VideoOrganizer(IVideoOrganizer):
 			self.notifier.AddStagingFile(vidFileData)
 
 	def ScanThread(self):
+		if not self.run:
+			return
 		try:
 			print('-- Scanner Thread initiated --')
 			# Lock - so both threads won't accidetnly work on the same file/s
@@ -90,7 +92,7 @@ class VideoOrganizer(IVideoOrganizer):
 			# Release the lock - so the worker can work if it needs to
 			workersLock.release()
 			print('-- Scanner Thread terminated --')
-		except:
+		except Exc:
 			print("-- ERROR: Exception raised in scanner thread")
 			traceback.print_exc(file=sys.stdout)
 			print('-' * 60)
@@ -102,6 +104,15 @@ class VideoOrganizer(IVideoOrganizer):
 
 		# Start Scanner Thread
 		self.scanThread.start()
+
+		while True:
+			try:
+				time.sleep(30)
+			except:
+				print 'caught ctrl-c'
+				self.Stop()
+				print 'self.run = %s' % str(self.run)
+				break
 
 	def ScanDir(self):
 		print('-- Scanning Directory ' + self.workingDir)
@@ -121,6 +132,10 @@ class VideoOrganizer(IVideoOrganizer):
 		else:
 			print('ERROR: Unknown action: Should never get here')
 
+	def Stop(self):
+		self.run = False
+		self.newDownloadsHandler.stop()
+
 	def __init__(self, configData):
 		self.configData = configData
 		self.subtitleManager = SubtitleManager(configData)
@@ -130,5 +145,5 @@ class VideoOrganizer(IVideoOrganizer):
 		self.notifier = Notifier(configData)
 		self.scanThread = Thread(target = self.ScanThread)
 		self.newDownloadsHandler = NewDownloadsHandler(self, self.downloadDir, self.workingDir)
-
+		self.run = True
 		

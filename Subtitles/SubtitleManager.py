@@ -14,7 +14,7 @@ class SubtitleManager:
 		#self.downloaders = [OpenSubtitles(), SubDB()]
 		self.downloaders = [OpenSubtitles()]
 		
-	def DownloadSubtitles(self, fileData: VidFileData):
+	def DownloadSubtitles(self, fileData):
 		print('------ Attempting to download subtitles')
 		langs = list(self.langauges)
 		# If no langauges configured skipping this phase
@@ -25,6 +25,7 @@ class SubtitleManager:
 		# Iterate over all downloaders until all subtitles in all languages are aquired.
 		foundLangs = []
 		for downloader in self.downloaders:
+			downloader = OpenSubtitles()
 			if isinstance(downloader, SubDownloader):
 				for lang in langs:
 					# If exists already a subtitle file for this language - we skip it.

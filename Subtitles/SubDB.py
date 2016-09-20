@@ -21,7 +21,7 @@ class SubDB(SubDownloader):
 	        data += f.read(readsize)
 	    return hashlib.md5(data).hexdigest()
 
-	def DownloadSubs(self, fileData: VidFileData, lang):
+	def DownloadSubs(self, fileData, lang):
 		# Start an http object
 		h = Http()
 

@@ -36,11 +36,11 @@ class Notifier:
 		for vidType in VideoType:
 			self.ClearLists(vidType)
 		
-	def ClearLists(self, vidType : VideoType):
+	def ClearLists(self, vidType):
 		for notifyType in NotifyFileType:
 			self.maps[vidType][notifyType] = []
 
-	def AddFile(self, notifyType: NotifyFileType, fileData: VidFileData):
+	def AddFile(self, notifyType, fileData):
 		mapsLock.acquire()
 		# First we check if this video has already been added to this list
 		found = False
@@ -55,7 +55,7 @@ class Notifier:
 		
 		mapsLock.release()
 
-	def RemoveFile(self, notifyType: NotifyFileType,fileData: VidFileData):
+	def RemoveFile(self, notifyType, fileData):
 		mapsLock.acquire()
 		try:
 			self.maps[fileData.GetType()][notifyType].remove(fileData)
@@ -63,21 +63,21 @@ class Notifier:
 			pass
 		mapsLock.release()
 
-	def AddReadyFile(self, fileData: VidFileData):
+	def AddReadyFile(self, fileData):
 		self.AddFile(NotifyFileType.Ready, fileData)
 		# In case the file is also in the staging list we remove it - as it is ready
 		self.RemoveFile(NotifyFileType.Staging, fileData)
 
-	def AddStagingFile(self, fileData: VidFileData):
+	def AddStagingFile(self, fileData):
 		self.AddFile(NotifyFileType.Staging, fileData)
 
-	def AddDownloadedFile(self, fileData: VidFileData):
+	def AddDownloadedFile(self, fileData):
 		self.AddFile(NotifyFileType.Downloaded, fileData)
 
-	def GetVids(self, vidType : VideoType, notifyType: NotifyFileType):
+	def GetVids(self, vidType, notifyType):
 		return self.maps[vidType][notifyType]
 
-	def GetTitleAndCaption(self, vidType : VideoType, notifyType: NotifyFileType):
+	def GetTitleAndCaption(self, vidType, notifyType):
 		title = ''
 		caption = ''
 		if notifyType is NotifyFileType.Ready:
@@ -98,7 +98,7 @@ class Notifier:
 
 		return (title, caption)
 
-	def GenerateContent(self, vidType : VideoType, notifyType: NotifyFileType, vids: list):
+	def GenerateContent(self, vidType, notifyType, vids):
 		title, caption = self.GetTitleAndCaption(vidType, notifyType)
 		content = '<p><b>' + title + ':</b><br>' + caption + '<br>'
 		for fileData in vids:
@@ -113,7 +113,7 @@ class Notifier:
 
 		return ','.join(map(str, s))
 
-	def GetVideoTypeDescription(self, vidType : VideoType):
+	def GetVideoTypeDescription(self, vidType):
 		if VideoType.tvShow == vidType:
 			return "Episodes"
 		elif VideoType.movie == vidType:
@@ -121,7 +121,7 @@ class Notifier:
 		else:
 			return "Videos"
 
-	def SendNotification(self, vidType : VideoType):
+	def SendNotification(self, vidType):
 		# First we copy and clear the members list - we do this under lock so they won't be changed in the meantime.
 		mapsLock.acquire()
 		# If no updates to send we leave.

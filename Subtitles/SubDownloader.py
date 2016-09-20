@@ -5,14 +5,14 @@ from VidFileData import VidFileData
 SearchLanguages = ['en']
 
 class SubDownloader:
-	def GetSubtitleFilePath(self, fileData: VidFileData, lang):
+	def GetSubtitleFilePath(self, fileData, lang):
 		srtFile = os.path.join(fileData.fileDir, fileData.fileName[:fileData.fileName.rfind('.')] + "-" + lang + ".srt")
 		return srtFile
 
-	def DownloadSubs(self, fileData: VidFileData, lang):
+	def DownloadSubs(self, fileData, lang):
 		return self.GetLanguages()
 
-	def SaveSubtitleFile(self, fileData: VidFileData, lang, content):
+	def SaveSubtitleFile(self, fileData, lang, content):
 		# Construct sub file path
 		subFilePath = self.GetSubtitleFilePath(fileData, lang)
 

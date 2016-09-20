@@ -4,14 +4,14 @@ import hashlib
 import os
 import struct
 from SubDownloader import SubDownloader
-import xmlrpc.client
+import xmlrpclib
 import math
 import base64
 import gzip
 import traceback
 import sys
 
-OpenSubtitlesUrl_Download = "http://api.opensubtitles.org/xml-rpc"
+OpenSubtitlesUrl_Download = 'http://api.opensubtitles.org/xml-rpc'
 
 OpenSubtitlesUrl_UserName = "VidMngr"
 OpenSubtitlesUrl_Password = "Mov!esAndShows"
@@ -53,9 +53,10 @@ class OpenSubtitles(SubDownloader):
 
 	def Connect(self):
 		# Connect to open subtitles server
-		self.osProxy = xmlrpc.client.ServerProxy(OpenSubtitlesUrl_Download)
+		print('*****%s********' % OpenSubtitlesUrl_Download)
+		self.osProxy = xmlrpclib.ServerProxy(OpenSubtitlesUrl_Download, allow_none=1)
 		if self.osProxy == None:
-			raise
+			raise Exception('Failed connecting to Open Subtitles')
 
 	def LogIn(self):
 		# Log in to server
@@ -75,7 +76,7 @@ class OpenSubtitles(SubDownloader):
 			pass
 
 
-	def SearchSubs(self, fileData: VidFileData, lang):
+	def SearchSubs(self, fileData, lang):
 		# Get episode hash
 		epHash = self.get_hash(fileData.GetFilePath())
 
@@ -100,7 +101,7 @@ class OpenSubtitles(SubDownloader):
 
 		return data
 
-	def DownloadSubtitle(self, fileData: VidFileData, lang, searchResults):
+	def DownloadSubtitle(self, fileData, lang, searchResults):
 		for searchResult in searchResults:
 			# Verify we have the correct series name
 			#episodeName = searchResult['MovieName']
@@ -151,7 +152,7 @@ class OpenSubtitles(SubDownloader):
 		return False
 
 
-	def DownloadSubs(self, fileData: VidFileData, lang):
+	def DownloadSubs(self, fileData, lang):
 		try:		
 			# Connect
 			self.Connect()

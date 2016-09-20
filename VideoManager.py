@@ -21,9 +21,13 @@ def main():
 			# Start the Video Organizer
 			vidOrganizer = VideoOrganizer(configData)
 			vidOrganizer.Start()
-	except:
+	except Exception:
 		print('Exiting due to error...')
 		traceback.print_exc(file=sys.stdout)
+		vidOrganizer.Stop()
+
+	print('Till next time...')
+
 
 if __name__ == "__main__":
     main()

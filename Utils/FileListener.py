@@ -1,4 +1,5 @@
 import os
+import os.path
 import win32file
 import win32con
 import time
@@ -21,12 +22,13 @@ class IFileChangeRecipient:
 		raise NotImplementedError("Should have implemented this")
 
 class FileListener:
-	def __init__(self, pathToWatch, sink: IFileChangeRecipient):
+	def __init__(self, pathToWatch, sink):
+		self.run = True
 		self.pathToWatch = pathToWatch
 		self.sink = sink
 		if not os.path.isdir(self.pathToWatch):
-			print('-- ERROR: Download Directory does not exist (' + self.pathToWatch + ')')
-			raise
+			msg = '-- ERROR: Download Directory does not exist (' + self.pathToWatch + ')'
+			raise Exception(msg)
 
 	def ListenerThread(self):
 		hDir = win32file.CreateFile(self.pathToWatch,
@@ -37,7 +39,7 @@ class FileListener:
 									win32con.FILE_FLAG_BACKUP_SEMANTICS,
 									None)
 
-		while 1:
+		while self.run:
 			# wait for change (blocking)
 			results = win32file.ReadDirectoryChangesW(hDir,
 													  1024,
@@ -54,9 +56,20 @@ class FileListener:
 					time.sleep(1)
 					self.sink.OnFileChange(filePath, FILE_ACTIONS.get (action, "Unknown"))
 
+		print('FileListener exiting')
+
 	def Start(self):
 		self.listenerThread = Thread(target = self.ListenerThread)
 		self.listenerThread.start()
+
+	def stop(self):
+		print('stopping FileListener')
+		self.run = False
+		stop_file = os.path.join(self.pathToWatch, 'stoplistener')
+		with open(stop_file, 'w') as f:
+			f.write('stop')
+
+		os.remove(stop_file)
 
 def main():
 	path = r'C:\Users\Uri\Downloads\Torrents\Completed\Siboni\Test'

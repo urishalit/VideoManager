@@ -17,11 +17,12 @@ from Utilities import *
 DOWNLOAD_DIR_DILES_LIST_FILE_NAME = 'DownloadDirFiles'
 
 class NewDownloadsHandler(IFileChangeRecipient):
-	def __init__(self, organizer: IVideoOrganizer, downloadDir, workingDir):
+	def __init__(self, organizer, downloadDir, workingDir):
 		self.downloadDir = downloadDir
 		self.workingDir = workingDir
 		self.organizer = organizer
 		self.fileListener = FileListener(self.downloadDir, self)
+		self.run = True
 
 	def Start(self):
 		# Start file listener
@@ -44,7 +45,7 @@ class NewDownloadsHandler(IFileChangeRecipient):
 		try:
 			with open(os.path.join(os.getcwd(), DOWNLOAD_DIR_DILES_LIST_FILE_NAME), 'rb') as h:
 				return pickle.load(h)
-		except:
+		except Exception:
 			return []
 
 	def InitDir(self):
@@ -65,8 +66,17 @@ class NewDownloadsHandler(IFileChangeRecipient):
 		self.SaveDownloadDirFileList(currFiles)
 
 
+	def stop(self):
+		self.run = False
+		self.fileListener.stop()
+		print('stopped NewDownloadsHandler')
+
 	def WorkerThread(self, path):
 		try:
+			if not self.run:
+				print('NewDownloadsHandler exiting')
+				return
+
 			print('-- Worker Thread initiated --')
 			workersLock.acquire()
 			# Update directory listing of files
@@ -87,7 +97,7 @@ class NewDownloadsHandler(IFileChangeRecipient):
 			self.organizer.Process(newPath, True)
 			workersLock.release()
 			print('-- Worker Thread terminated --')
-		except:
+		except Exception:
 			print("-- ERROR: Exception raised in worker thread")
 			traceback.print_exc(file=sys.stdout)
 			print('-' * 60)

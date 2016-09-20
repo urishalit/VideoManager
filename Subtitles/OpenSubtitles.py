@@ -53,9 +53,8 @@ class OpenSubtitles(SubDownloader):
 
 	def Connect(self):
 		# Connect to open subtitles server
-		print('*****%s********' % OpenSubtitlesUrl_Download)
-		self.osProxy = xmlrpclib.ServerProxy(OpenSubtitlesUrl_Download, allow_none=1)
-		if self.osProxy == None:
+		self.osProxy = xmlrpclib.ServerProxy(OpenSubtitlesUrl_Download)
+		if self.osProxy is None:
 			raise Exception('Failed connecting to Open Subtitles')
 
 	def LogIn(self):

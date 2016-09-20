@@ -16,6 +16,7 @@ FILE_ACTIONS = {
 }
 
 FILE_LIST_DIRECTORY = 0x0001
+STOP_FILE = 'STOP_LISTENER_FILE'
 
 class IFileChangeRecipient:
 	def OnFileChange(self, filePath, action):
@@ -50,22 +51,21 @@ class FileListener:
 
 
 			for action, file in results:
+				if file == STOP_FILE:
+					break
 				if action == 1:
 					filePath = os.path.join(self.pathToWatch, file)
 					# TODO - Change to real logic!
 					time.sleep(1)
 					self.sink.OnFileChange(filePath, FILE_ACTIONS.get (action, "Unknown"))
 
-		print('FileListener exiting')
-
 	def Start(self):
 		self.listenerThread = Thread(target = self.ListenerThread)
 		self.listenerThread.start()
 
 	def stop(self):
-		print('stopping FileListener')
 		self.run = False
-		stop_file = os.path.join(self.pathToWatch, 'stoplistener')
+		stop_file = os.path.join(self.pathToWatch, STOP_FILE)
 		with open(stop_file, 'w') as f:
 			f.write('stop')
 

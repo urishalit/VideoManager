@@ -69,7 +69,6 @@ class NewDownloadsHandler(IFileChangeRecipient):
 	def stop(self):
 		self.run = False
 		self.fileListener.stop()
-		print('stopped NewDownloadsHandler')
 
 	def WorkerThread(self, path):
 		try:

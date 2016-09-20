@@ -109,9 +109,7 @@ class VideoOrganizer(IVideoOrganizer):
 			try:
 				time.sleep(30)
 			except:
-				print 'caught ctrl-c'
 				self.Stop()
-				print 'self.run = %s' % str(self.run)
 				break
 
 	def ScanDir(self):

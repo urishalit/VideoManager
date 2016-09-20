@@ -24,10 +24,9 @@ def main():
 	except Exception:
 		print('Exiting due to error...')
 		traceback.print_exc(file=sys.stdout)
-		vidOrganizer.Stop()
 
-	print('Till next time...')
-
+	vidOrganizer.Stop()
+	print('Exiting...')
 
 if __name__ == "__main__":
     main()

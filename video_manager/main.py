@@ -1,14 +1,7 @@
-import os.path
-import sys
 import traceback
 
 from logic.cmd_line_parser import parse_cmd_line
 from logic.video_organizer import VideoOrganizer
-
-sys.path.append(os.path.abspath('logic'))
-sys.path.append(os.path.abspath(os.path.join('logic', 'data')))
-sys.path.append(os.path.abspath('subtitles'))
-sys.path.append(os.path.abspath('utils'))
 
 
 def main():
@@ -16,7 +9,7 @@ def main():
     try:
         # Load the Config File data
         config_data = parse_cmd_line()
-        if None != config_data:
+        if config_data is not None:
             # Start the Video Organizer
             vid_organizer = VideoOrganizer(config_data)
             vid_organizer.start()

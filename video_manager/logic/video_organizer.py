@@ -46,7 +46,7 @@ class VideoOrganizer(IVideoOrganizer):
             self.notifier.add_downloaded_file(vid_file_data)
 
         # Download subtitles for TV show
-        result = self.subtitleManager.DownloadSubtitles(vid_file_data)
+        result = self.subtitleManager.download_subtitles(vid_file_data)
         if result:
             # Move files and associates to proper location
             vid_file_data.move_to_target_directory()

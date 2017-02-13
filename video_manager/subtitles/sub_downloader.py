@@ -1,25 +1,24 @@
 import os.path
-from VidFileData import VidFileData
+from abc import abstractmethod, ABCMeta
 
 SearchLanguages = ['en']
 
 
-class SubDownloader:
-    def GetSubtitleFilePath(self, fileData, lang):
-        srtFile = os.path.join(fileData.fileDir, fileData.fileName[:fileData.fileName.rfind('.')] + "-" + lang + ".srt")
-        return srtFile
+class SubDownloader(object):
+    __metaclass__ = ABCMeta
 
-    def DownloadSubs(self, fileData, lang):
-        return self.GetLanguages()
+    @classmethod
+    def get_subtitle_file_path(cls, file_data, lang):
+        return os.path.join(file_data.fileDir, file_data.fileName[:file_data.fileName.rfind('.')] + "-" + lang + ".srt")
 
-    def SaveSubtitleFile(self, fileData, lang, content):
+    def save_subtitle_file(self, file_data, lang, content):
         # Construct sub file path
-        subFilePath = self.GetSubtitleFilePath(fileData, lang)
+        sub_file_path = self.get_subtitle_file_path(file_data, lang)
 
         # Save subtitle to file
-        subFile = open(subFilePath, 'wb')
-        subFile.write(content)
-        subFile.close()
+        sub_file = open(sub_file_path, 'wb')
+        sub_file.write(content)
+        sub_file.close()
 
         # Add to associated files
-        fileData.add_associated_file(subFilePath)
+        file_data.add_associated_file(sub_file_path)

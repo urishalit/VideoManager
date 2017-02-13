@@ -14,46 +14,46 @@ MyUserAgent = "SubDB/1.0 (Shalit/0.1; http://none)"
 
 class SubDB(SubDownloader):
     # this hash function receives the name of the file and returns the hash code
-    def get_hash(self, name):
-        readsize = 64 * 1024
+    @staticmethod
+    def get_hash(name):
+        read_size = 64 * 1024
         with open(name, 'rb') as f:
-            size = os.path.getsize(name)
-            data = f.read(readsize)
-            f.seek(-readsize, os.SEEK_END)
-            data += f.read(readsize)
+            data = f.read(read_size)
+            f.seek(-read_size, os.SEEK_END)
+            data += f.read(read_size)
         return hashlib.md5(data).hexdigest()
 
-    def DownloadSubs(self, fileData, lang):
+    def download_subs(self, file_data, lang):
         # Start an http object
         h = Http()
 
         # Get episode hash
-        epHash = self.get_hash(fileData.get_file_path())
+        ep_hash = self.get_hash(file_data.get_file_path())
 
         # Construct Url
-        url = SubDBUrl_Search.replace('HASH_ALIAS', epHash)
+        url = SubDBUrl_Search.replace('HASH_ALIAS', ep_hash)
 
         # Search for subs
         resp, content = h.request(url, "GET", headers={'user-agent': MyUserAgent})
-        if (resp.status != 200):
+        if resp.status != 200:
             return False
 
         # Get supported languages that actually interest us.
-        langsFound = str(content)[2:-1].split(',')
-        if lang not in langsFound:
+        langs_found = str(content)[2:-1].split(',')
+        if lang not in langs_found:
             return False
 
         # Download subtitles for all languages
         # Construct Url
-        url = SubDBUrl_Download.replace('HASH_ALIAS', epHash)
+        url = SubDBUrl_Download.replace('HASH_ALIAS', ep_hash)
         # Replace language alias in url
         url = url.replace('LANGUAGE_ALIAS', lang)
         # Download subtitle
         resp, content = h.request(url, "GET", headers={'user-agent': MyUserAgent})
-        if (resp.status != 200):
+        if resp.status != 200:
             return False
 
         # Save the subtitle file
-        self.SaveSubtitleFile(fileData, lang, content)
+        self.save_subtitle_file(file_data, lang, content)
 
         return True

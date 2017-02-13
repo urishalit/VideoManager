@@ -6,7 +6,7 @@ from copy import deepcopy
 from cmd_line_consts import *
 from config import CONFIG
 
-CONFIGURATION_FILE_NAME = "config.py"
+CONFIGURATION_FILE_NAME = 'config.py'
 
 
 def get_parameter_value(arg_name, default_value=None, prefix='-', suffix='='):
@@ -114,7 +114,7 @@ def get_default_config_file_path():
 def load_config_file(config_file):
     # if no config file - display error and exit
     if not os.path.isfile(config_file):
-        print(config_file + " does not exist.")
+        print(config_file + ' does not exist.')
         sys.exit()
 
     # Read config file data
@@ -167,22 +167,22 @@ def parse_cmd_line():
     # Check if there is a download directory to override the one in the config file
     download_dir = get_parameter_value(CMD_ARG_DOWNLOAD_DIR, download_dir)
     if len(download_dir) > 0:
-        config_data["DownloadDirectory"] = download_dir
+        config_data['DownloadDirectory'] = download_dir
 
     # Check if there is a working directory to override the one in the config file
     working_dir = get_parameter_value(CMD_ARG_WORKING_DIR, working_dir)
     if len(working_dir) > 0:
-        config_data["WorkingDirectory"] = working_dir
+        config_data['WorkingDirectory'] = working_dir
 
     # Check if there is a shows target directory to override the one in the config file
     shows_dir = get_parameter_value(CMD_ARG_SHOWS_DIR, shows_dir)
     if len(shows_dir) > 0:
-        config_data["TVShows"]["TargetDirectory"] = shows_dir
+        config_data['TVShows']['TargetDirectory'] = shows_dir
 
     # Check if there is a shows target directory to override the one in the config file
     movies_dir = get_parameter_value(CMD_ARG_MOVIES_DIR, movies_dir)
     if len(movies_dir) > 0:
-        config_data["Movies"]["TargetDirectory"] = movies_dir
+        config_data['Movies']['TargetDirectory'] = movies_dir
 
     no_emails = get_parameter_value(CMD_ARG_NO_EMAIL, False, '-', '')
     emails = get_parameter_value(CMD_ARG_EMAILS)

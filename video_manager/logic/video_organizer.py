@@ -26,10 +26,10 @@ class VideoOrganizer(IVideoOrganizer):
             self.process_video(os.path.dirname(path), os.path.basename(path), is_new_download)
 
     def process_video(self, directory, file_name, is_new_download):
-        print("---- Working on " + file_name)
+        print('---- Working on ' + file_name)
         # First check if this is actually a video file
         if not is_vid_file(file_name):
-            print("---- Not supporting movie files yet: " + file_name)
+            print('---- Not supporting movie files yet: ' + file_name)
             return
 
         # Capitalize First letters of every word
@@ -89,7 +89,7 @@ class VideoOrganizer(IVideoOrganizer):
             workers_lock.release()
             print('-- Scanner Thread terminated --')
         except Exception:
-            print("-- ERROR: Exception raised in scanner thread")
+            print('-- ERROR: Exception raised in scanner thread')
             traceback.print_exc(file=sys.stdout)
             print('-' * 60)
 
@@ -132,9 +132,9 @@ class VideoOrganizer(IVideoOrganizer):
     def __init__(self, config_data):
         self.config_data = config_data
         self.subtitleManager = SubtitleManager(config_data)
-        self.working_dir = config_data["WorkingDirectory"]
-        self.downloadDir = config_data["DownloadDirectory"]
-        self.scanIntervalSec = config_data["ScanIntervalSec"]
+        self.working_dir = config_data['WorkingDirectory']
+        self.downloadDir = config_data['DownloadDirectory']
+        self.scanIntervalSec = config_data['ScanIntervalSec']
         self.notifier = Notifier(config_data)
         self.scanThread = Thread(target=self.scan_thread)
         self.newDownloadsHandler = NewDownloadsHandler(self, self.downloadDir, self.working_dir)

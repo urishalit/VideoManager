@@ -29,15 +29,17 @@ class NewDownloadsHandler(IFileChangeRecipient):
         self.check_for_new_files_since_last_time()
 
     def on_file_change(self, file_path, action):
-        print("-- " + file_path + " " + action)
+        print('-- ' + file_path + ' ' + action)
         thread = Thread(target=self.worker_thread, args=(file_path,))
         thread.start()
 
-    def save_download_dir_file_list(self, files):
+    @staticmethod
+    def save_download_dir_file_list(files):
         with open(os.path.join(os.getcwd(), DOWNLOAD_DIR_FILES_LIST_FILE_NAME), 'wb') as h:
             pickle.dump(files, h)
 
-    def get_download_dir_file_list(self):
+    @staticmethod
+    def get_download_dir_file_list():
         try:
             with open(os.path.join(os.getcwd(), DOWNLOAD_DIR_FILES_LIST_FILE_NAME), 'rb') as h:
                 return pickle.load(h)
@@ -48,7 +50,7 @@ class NewDownloadsHandler(IFileChangeRecipient):
         print('-- Directory: ' + self.download_dir)
         files = os.listdir(self.download_dir)
         self.save_download_dir_file_list(files)
-        print('-- Directory contenets saved')
+        print('-- Directory contents saved')
 
     def check_for_new_files_since_last_time(self):
         # Check if there are new files in the Download directory
@@ -57,7 +59,7 @@ class NewDownloadsHandler(IFileChangeRecipient):
         # Get the difference in the files image in the download directory
         diff_files = list(set(curr_files) - set(prev_files))
         for _file in diff_files:
-            self.on_file_change(os.path.join(self.download_dir, _file), "Created")
+            self.on_file_change(os.path.join(self.download_dir, _file), 'Created')
         # Save the current image of the files
         self.save_download_dir_file_list(curr_files)
 
@@ -91,6 +93,6 @@ class NewDownloadsHandler(IFileChangeRecipient):
             workers_lock.release()
             print('-- Worker Thread terminated --')
         except Exception:
-            print("-- ERROR: Exception raised in worker thread")
+            print('-- ERROR: Exception raised in worker thread')
             traceback.print_exc(file=sys.stdout)
             print('-' * 60)

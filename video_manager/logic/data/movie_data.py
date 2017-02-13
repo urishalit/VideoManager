@@ -8,7 +8,7 @@ class MovieData(VidFileData):
         self.title = title
         self.year = str(year)
         self.type = VideoType.movie
-        self.initiate_target_directory(config_data["Movies"]["TargetDirectory"])
+        self.initiate_target_directory(config_data['Movies']['TargetDirectory'])
 
     def get_movie_title(self):
         return self.title
@@ -23,9 +23,9 @@ class MovieData(VidFileData):
             return self.generate_plain_text()
 
     def generate_link_text(self):
-        text = '<a href=\"http://www.imdb.com/title/tt'
+        text = '<a href=\'http://www.imdb.com/title/tt'
         text += str(self.imdb_title_id)
-        text += '\" target=\"_blank\">'
+        text += '\' target=\'_blank\'>'
         text += self.generate_plain_text()
         text += '</a>'
 

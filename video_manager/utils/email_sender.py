@@ -10,9 +10,9 @@ PROGRAM_USERNAME = 'vidmngr'
 PROGRAM_PASSWORD = 'Mov!esAndShows'
 
 
-def SendEmail(to, subject, content, type='plain'):
+def send_email(to, subject, content, text_type='plain'):
     # Create a text/plain message
-    msg = MIMEText(content, type)
+    msg = MIMEText(content, text_type)
 
     # me == the sender's email address
     # you == the recipient's email address
@@ -30,4 +30,4 @@ def SendEmail(to, subject, content, type='plain'):
 
 
 if __name__ == "__main__":
-    SendEmail('urishalit@gmail.com', 'VideoManager: Update', 'Hello!')
+    send_email('urishalit@gmail.com', 'VideoManager: Update', 'Hello!')

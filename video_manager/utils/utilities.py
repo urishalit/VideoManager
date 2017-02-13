@@ -1,54 +1,56 @@
-import os, os.path
-import string
-import stat
-import shutil
-from unrar import rarfile
 import glob
+import os
+import os.path
+import shutil
+import stat
+import string
+
+from unrar import rarfile
 
 # Known vid extensions
-vidExtenstions = ['.avi', '.mkv', '.mp4']
+vid_extensions = ['.avi', '.mkv', '.mp4']
 
 MIN_VID_SIZE_BYTE = 2000000
 
 
-def is_vid_file(file):
-    ext = os.path.splitext(file)[1]
-    return ext in vidExtenstions
+def is_vid_file(file_path):
+    ext = os.path.splitext(file_path)[1]
+    return ext in vid_extensions
 
 
-def GetWordDelimiter(baseName):
-    firstDot = baseName.find('.')
-    if firstDot < 0:
-        firstDot = len(baseName)
+def get_word_delimiter(base_name):
+    first_dot = base_name.find('.')
+    if first_dot < 0:
+        first_dot = len(base_name)
 
-    firstSpace = baseName.find(' ')
-    if firstSpace < 0:
-        firstSpace = len(baseName)
+    first_space = base_name.find(' ')
+    if first_space < 0:
+        first_space = len(base_name)
 
-    if firstDot < firstSpace:
+    if first_dot < first_space:
         return '.'
-    elif firstSpace < firstDot:
+    elif first_space < first_dot:
         return ' '
     else:
         return ''
 
 
-def captalize_first_letters(dir, file):
-    ext = os.path.splitext(file)[1]
-    base = os.path.splitext(file)[0]
+def capitalize_first_letters(directory, file_name):
+    ext = os.path.splitext(file_name)[1]
+    base = os.path.splitext(file_name)[0]
 
-    delim = GetWordDelimiter(base)
-    newBase = string.capwords(base, delim)
+    delimiter = get_word_delimiter(base)
+    new_base = string.capwords(base, delimiter)
 
-    src = os.path.abspath(os.path.join(dir, file))
-    trgt = os.path.abspath(os.path.join(dir, newBase + ext))
+    src = os.path.abspath(os.path.join(directory, file_name))
+    target = os.path.abspath(os.path.join(directory, new_base + ext))
 
-    os.rename(src, trgt)
+    os.rename(src, target)
 
-    return newBase + ext
+    return new_base + ext
 
 
-def RemoveNonVideoFilesFromDir(path):
+def remove_non_video_files_from_dir(path):
     remove = False
     if not os.path.isdir(path):
         if not is_vid_file(path):
@@ -57,10 +59,10 @@ def RemoveNonVideoFilesFromDir(path):
             remove = True
     else:
         files = os.listdir(path)
-        for file in files:
-            filePath = os.path.join(path, file)
+        for _file in files:
+            file_path = os.path.join(path, _file)
             # Attempt removing non video files from path
-            RemoveNonVideoFilesFromDir(filePath)
+            remove_non_video_files_from_dir(file_path)
         # If the directory is empty we remove it
         if len(os.listdir(path)) == 0:
             remove = True

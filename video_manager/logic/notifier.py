@@ -2,7 +2,7 @@ import threading
 from enum import Enum
 
 from logic.data.vid_file_data import VideoType
-from utils.email_sender import SendEmail
+from utils.email_sender import send_email
 
 maps_lock = threading.Lock()
 
@@ -159,7 +159,7 @@ class Notifier:
         # Content suffix
         content += '</body></html>'
         for email in self.email_list:
-            SendEmail(email, subject, content, 'html')
+            send_email(email, subject, content, 'html')
             print('---- ' + vid_type_desc + ' notification email sent to ' + email)
 
     def send_notifications(self):

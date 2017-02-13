@@ -8,7 +8,7 @@ from threading import Thread
 
 from logic.logic_defs import workers_lock
 from utils.file_listener import IFileChangeRecipient, FileListener
-from utils.utilities import unrar_videos, RemoveNonVideoFilesFromDir
+from utils.utilities import unrar_videos, remove_non_video_files_from_dir
 
 DOWNLOAD_DIR_FILES_LIST_FILE_NAME = 'DownloadDirFiles'
 
@@ -23,7 +23,7 @@ class NewDownloadsHandler(IFileChangeRecipient):
 
     def start(self):
         # Start file listener
-        self.file_listener.Start()
+        self.file_listener.start()
 
         # Check if there are new files in the Download directory since last time
         self.check_for_new_files_since_last_time()
@@ -83,7 +83,7 @@ class NewDownloadsHandler(IFileChangeRecipient):
                 if os.path.isdir(path):
                     shutil.copytree(path, new_path)
                     unrar_videos(new_path)
-                    RemoveNonVideoFilesFromDir(new_path)
+                    remove_non_video_files_from_dir(new_path)
                 elif os.path.isfile(path):
                     shutil.copyfile(path, new_path)
             else:

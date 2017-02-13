@@ -14,7 +14,7 @@ from logic.logic_defs import IVideoOrganizer, workers_lock
 from new_downloads_handler import NewDownloadsHandler
 from notifier import Notifier
 from subtitles.subtitle_manager import SubtitleManager
-from utils.utilities import is_vid_file, captalize_first_letters
+from utils.utilities import is_vid_file, capitalize_first_letters
 
 
 class VideoOrganizer(IVideoOrganizer):
@@ -33,7 +33,7 @@ class VideoOrganizer(IVideoOrganizer):
             return
 
         # Capitalize First letters of every word
-        file_name = captalize_first_letters(directory, file_name)
+        file_name = capitalize_first_letters(directory, file_name)
 
         # Parse the information from the file name and return an object representing it.
         vid_file_data = get_vid_file_data(directory, file_name, self.config_data)

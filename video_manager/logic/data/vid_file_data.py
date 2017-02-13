@@ -5,7 +5,7 @@ import stat
 
 from enum import Enum
 
-from utils.file_security import AddFullAccessToFile
+from utils.file_security import add_full_access_to_file
 
 
 class VideoType(Enum):
@@ -137,7 +137,7 @@ class VidFileData(object):
 
             if move_files:
                 shutil.move(file, target_file_path)
-                AddFullAccessToFile(target_file_path)
+                add_full_access_to_file(target_file_path)
             else:
                 os.remove(file)
 

@@ -1,0 +1,141 @@
+import os
+import os.path
+import shutil
+import stat
+import sys
+import time
+import traceback
+from threading import Thread
+from threading import Timer
+
+from logic.cmd_line_consts import Actions
+from logic.data.vid_file_data_factory import get_vid_file_data
+from logic.logic_defs import IVideoOrganizer, workersLock
+from new_downloads_handler import NewDownloadsHandler
+from notifier import Notifier
+from subtitles import subtitle_manager
+from utils.utilities import IsVidFile, CaptalizeFirstLetters
+
+
+class VideoOrganizer(IVideoOrganizer):
+    def Process(self, path, isNewDownload=False):
+        if os.path.isdir(path):
+            for file in os.listdir(path):
+                self.Process(os.path.join(path, file), isNewDownload)
+        else:
+            self.ProcessVideo(os.path.dirname(path), os.path.basename(path), isNewDownload)
+
+    def ProcessVideo(self, dir, file, isNewDownload):
+        print("---- Working on " + file)
+        # First check if this is actually a video file
+        if not IsVidFile(file):
+            print("---- Not supporting movie files yet: " + file)
+            return
+
+        # Capitize First letters of every word
+        file = CaptalizeFirstLetters(dir, file)
+
+        # Parse the infomrmation from the file name and return an object representing it.
+        vidFileData = get_vid_file_data(dir, file, self.configData)
+
+        # Make sure TV file is up to format
+        vidFileData.rename_to_format()
+
+        if isNewDownload:
+            # This should happen only once per video
+            self.notifier.AddDownloadedFile(vidFileData)
+
+        # Download subtitles for TV show
+        result = self.subtitleManager.DownloadSubtitles(vidFileData)
+        if result == True:
+            # Move files and associates to proper location
+            vidFileData.move_to_target_directory()
+            # Add to Notifier as ready episode
+            self.notifier.AddReadyFile(vidFileData)
+        else:
+            # Add to Notifier as in staging episode
+            self.notifier.AddStagingFile(vidFileData)
+
+    def ScanThread(self):
+        if not self.run:
+            return
+        try:
+            print('-- Scanner Thread initiated --')
+            # Lock - so both threads won't accidetnly work on the same file/s
+            workersLock.acquire()
+
+            # Scan all files in working dir and see if we can make any ready
+            for file in os.listdir(self.workingDir):
+                path = os.path.join(self.workingDir, file)
+                if os.path.isdir(path):
+                    # If it is a directory we check if it is empty - if it is - we delete it.
+                    if len(os.listdir(path)) == 0:
+                        # If the file is read only we remove the read only flag as we are about to delete it
+                        if not os.access(path, os.W_OK):
+                            os.chmod(path, stat.S_IWUSR)
+                        # Remove it
+                        shutil.rmtree(path)
+                # Process the file/directory
+                self.Process(os.path.join(self.workingDir, file))
+
+            # Send Notification (email) if there is any new news to update
+            self.notifier.SendNotifications()
+
+            # Schedule the next scan
+            self.scanThread = Timer(self.scanIntervalSec, self.ScanThread)
+            self.scanThread.start()
+
+            # Release the lock - so the worker can work if it needs to
+            workersLock.release()
+            print('-- Scanner Thread terminated --')
+        except Exception:
+            print("-- ERROR: Exception raised in scanner thread")
+            traceback.print_exc(file=sys.stdout)
+            print('-' * 60)
+
+    def StartFully(self):
+        # Start new downloads listener
+        self.newDownloadsHandler.Start()
+
+        # Start Scanner Thread
+        self.scanThread.start()
+
+        while True:
+            try:
+                time.sleep(30)
+            except:
+                self.Stop()
+                break
+
+    def ScanDir(self):
+        print('-- Scanning Directory ' + self.workingDir)
+        self.Process(self.workingDir)
+        self.notifier.SendNotifications()
+        print('-- Scan completed.')
+
+    def Start(self):
+        action = self.configData['action']
+
+        if Actions.full == action:
+            self.StartFully()
+        elif Actions.init_dir == action:
+            self.newDownloadsHandler.InitDir()
+        elif Actions.scan_dir == action:
+            self.ScanDir()
+        else:
+            print('ERROR: Unknown action: Should never get here')
+
+    def Stop(self):
+        self.run = False
+        self.newDownloadsHandler.stop()
+
+    def __init__(self, configData):
+        self.configData = configData
+        self.subtitleManager = subtitle_manager(configData)
+        self.workingDir = configData["WorkingDirectory"]
+        self.downloadDir = configData["DownloadDirectory"]
+        self.scanIntervalSec = configData["ScanIntervalSec"]
+        self.notifier = Notifier(configData)
+        self.scanThread = Thread(target=self.ScanThread)
+        self.newDownloadsHandler = NewDownloadsHandler(self, self.downloadDir, self.workingDir)
+        self.run = True

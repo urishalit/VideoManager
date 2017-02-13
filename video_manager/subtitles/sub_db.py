@@ -28,7 +28,7 @@ class SubDB(SubDownloader):
         h = Http()
 
         # Get episode hash
-        epHash = self.get_hash(fileData.GetFilePath())
+        epHash = self.get_hash(fileData.get_file_path())
 
         # Construct Url
         url = SubDBUrl_Search.replace('HASH_ALIAS', epHash)

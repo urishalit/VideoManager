@@ -44,21 +44,21 @@ class Notifier:
         mapsLock.acquire()
         # First we check if this video has already been added to this list
         found = False
-        for data in self.maps[fileData.GetType()][notifyType]:
-            if fileData.Equals(data):
+        for data in self.maps[fileData.get_type()][notifyType]:
+            if fileData.equals(data):
                 found = True
                 break
 
         # Only if it's the first time this video is added to the list we add it.
         if not found:
-            self.maps[fileData.GetType()][notifyType].append(fileData)
+            self.maps[fileData.get_type()][notifyType].append(fileData)
 
         mapsLock.release()
 
     def RemoveFile(self, notifyType, fileData):
         mapsLock.acquire()
         try:
-            self.maps[fileData.GetType()][notifyType].remove(fileData)
+            self.maps[fileData.get_type()][notifyType].remove(fileData)
         except:
             pass
         mapsLock.release()
@@ -102,14 +102,14 @@ class Notifier:
         title, caption = self.GetTitleAndCaption(vidType, notifyType)
         content = '<p><b>' + title + ':</b><br>' + caption + '<br>'
         for fileData in vids:
-            content += '\t' + fileData.GetNotificationText() + '<br>'
+            content += '\t' + fileData.get_notification_text() + '<br>'
         content += '</p><br><br>'
         return content
 
     def GetVidTitles(self, vids):
         s = set()
         for fileData in vids:
-            s.add(fileData.GetNotificationTitle())
+            s.add(fileData.get_notification_title())
 
         return ','.join(map(str, s))
 

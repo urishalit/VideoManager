@@ -75,10 +75,10 @@ class OpenSubtitles(SubDownloader):
 
     def SearchSubs(self, fileData, lang):
         # Get episode hash
-        epHash = self.get_hash(fileData.GetFilePath())
+        epHash = self.get_hash(fileData.get_file_path())
 
         # Get file byte size
-        fileSizeBytes = os.path.getsize(fileData.GetFilePath())
+        fileSizeBytes = os.path.getsize(fileData.get_file_path())
         # strfileSizeBytes = str(fileSizeBytes)
 
         searchResults = self.osProxy.SearchSubtitles(self.token, [

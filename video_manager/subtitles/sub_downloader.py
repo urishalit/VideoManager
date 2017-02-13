@@ -22,4 +22,4 @@ class SubDownloader:
         subFile.close()
 
         # Add to associated files
-        fileData.AddAssociatedFile(subFilePath)
+        fileData.add_associated_file(subFilePath)

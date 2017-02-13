@@ -29,7 +29,7 @@ class SubtitleManager:
                     subPath = downloader.GetSubtitleFilePath(fileData, lang)
                     if (os.path.exists(subPath)):
                         foundLangs.append(lang)
-                        fileData.AddAssociatedFile(subPath)
+                        fileData.add_associated_file(subPath)
                         continue
 
                     # Attempt downloading subtitle for language

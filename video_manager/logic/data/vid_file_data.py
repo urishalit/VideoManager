@@ -13,131 +13,136 @@ class VideoType(Enum):
     movie = 2
 
 
-class VidFileData:
-    def __init__(self, configData, fileDir, fileName, suffix):
-        self.configData = configData
-        self.fileDir = fileDir
-        self.fileName = fileName
+class VidFileData(object):
+    def __init__(self, config_data, file_dir, file_name, suffix):
+        self.config_data = config_data
+        self.file_dir = file_dir
+        self.file_name = file_name
         self.suffix = suffix
-        self.associatedFiles = []
-        self.associatedFiles.insert(0, self.GetFilePath())
-        self.baseFileName = os.path.basename(self.fileName)
-        self.workingDir = configData["WorkingDirectory"]
-        self.targetRootDir = ''
-        self.imdbTitleId = ''
+        self.associated_files = []
+        self.associated_files.insert(0, self.get_file_path())
+        self.base_file_name = os.path.basename(self.file_name)
+        self.working_dir = config_data['WorkingDirectory']
+        self.target_root_dir = ''
+        self.imdb_title_id = ''
+        self.move_files = False
+        self.type = None
 
-    def GetFilePath(self):
-        return os.path.abspath(os.path.join(self.fileDir, self.fileName))
+    def get_file_path(self):
+        return os.path.abspath(os.path.join(self.file_dir, self.file_name))
 
-    def GetVidExtension(self):
-        return os.path.splitext(self.fileName)[1]
+    def get_vid_extension(self):
+        return os.path.splitext(self.file_name)[1]
 
-    def AddAssociatedFile(self, path):
-        self.associatedFiles.append(path)
+    def add_associated_file(self, path):
+        self.associated_files.append(path)
 
-    def RenameFile(self, dir, file):
+    def rename_file(self, dir, file):
         # Current path
-        currPath = self.GetFilePath()
+        curr_path = self.get_file_path()
 
         # Remove current path from list of associated files
-        self.associatedFiles = list(set(self.associatedFiles) - set([currPath]))
+        self.associated_files = list(set(self.associated_files) - {curr_path})
 
         # Update dir & file name
-        self.fileDir = dir
-        self.fileName = file
+        self.file_dir = dir
+        self.file_name = file
 
         # Add file to associated files list
-        self.AddAssociatedFile(self.GetFilePath())
+        self.add_associated_file(self.get_file_path())
 
         # Rename file
-        os.rename(currPath, self.GetFilePath())
+        os.rename(curr_path, self.get_file_path())
 
-    def AddSuffixToFiles(self, suffix):
-        newAssociatedFileList = []
-        newBaseName = os.path.splitext(self.baseFileName)[0] + str(suffix)
+    def add_suffix_to_files(self, suffix):
+        new_associated_file_list = []
+        new_base_name = os.path.splitext(self.base_file_name)[0] + str(suffix)
 
-        currBaseName = os.path.splitext(os.path.basename(self.fileName))[0]
-        for file in self.associatedFiles:
-            newFile = file.replace(currBaseName, newBaseName)
-            newAssociatedFileList.append(newFile)
+        curr_base_name = os.path.splitext(os.path.basename(self.file_name))[0]
+        for _file in self.associated_files:
+            new_file = _file.replace(curr_base_name, new_base_name)
+            new_associated_file_list.append(new_file)
 
-        self.fileName = newBaseName + os.path.splitext(os.path.basename(self.fileName))[1]
-        self.associatedFiles = newAssociatedFileList
+        self.file_name = new_base_name + os.path.splitext(os.path.basename(self.file_name))[1]
+        self.associated_files = new_associated_file_list
 
-    def IsMovie(self):
+    def is_movie(self):
         return VideoType.movie == self.type
 
-    def IsTvShow(self):
+    def is_tv_show(self):
         return VideoType.tvShow == self.type
 
-    def GetType(self):
+    def get_type(self):
         return self.type
 
-    def GetNotificationText(self):
+    def get_notification_text(self):
         raise NotImplemented
 
-    def GetNotificationTitle(self):
+    def get_notification_title(self):
         raise NotImplemented
 
-    def RenameToFormat(self):
+    def rename_to_format(self):
         return
 
-    def MoveToTargetDirectory(self):
-        self.MoveToDir(self.targetRootDir)
+    def move_to_target_directory(self):
+        self.move_to_dir(self.target_root_dir)
 
-    def InitiateTargetDirectory(self, path):
-        self.targetRootDir = path
-        if os.path.exists(self.targetRootDir):
-            if not os.path.isdir(self.targetRootDir):
-                self.targetRootDir = ''
+    def initiate_target_directory(self, path):
+        self.target_root_dir = path
+        if os.path.exists(self.target_root_dir):
+            if not os.path.isdir(self.target_root_dir):
+                self.target_root_dir = ''
         else:
-            os.makedirs(self.targetRootDir)
-            if not os.path.isdir(self.targetRootDir):
-                self.targetRootDir = ''
+            os.makedirs(self.target_root_dir)
+            if not os.path.isdir(self.target_root_dir):
+                self.target_root_dir = ''
 
-        if len(self.targetRootDir) == 0:
-            self.moveFiles = False
+        if len(self.target_root_dir) == 0:
+            self.move_files = False
         else:
             # If the shows dir is the same as the working directory - we do not move the files
-            self.moveFiles = self.targetRootDir != self.workingDir
+            self.move_files = self.target_root_dir != self.working_dir
 
-    def MoveToDir(self, targetPath):
-        if not self.moveFiles:
+    def move_to_dir(self, target_path):
+        if not self.move_files:
             return
 
         # Verify target dir exists
-        if not os.path.exists(targetPath):
-            os.makedirs(targetPath)
+        if not os.path.exists(target_path):
+            os.makedirs(target_path)
 
-        moveFiles = True
+        move_files = True
         # Check if file with same name already exists
-        targetVidPath = os.path.join(targetPath, self.fileName)
+        target_vid_path = os.path.join(target_path, self.file_name)
         counter = 0
-        while os.path.exists(targetVidPath) and counter < 10:
+        while os.path.exists(target_vid_path) and counter < 10:
             # If a file with that name already exists and it has the same size we do nothing.
-            if os.path.getsize(targetVidPath) == os.path.getsize(os.path.join(self.fileDir, self.fileName)):
-                print('------ File already exists in target directory: ' + targetPath)
-                moveFiles = False
+            if os.path.getsize(target_vid_path) == os.path.getsize(os.path.join(self.file_dir, self.file_name)):
+                print('------ File already exists in target directory: ' + target_path)
+                move_files = False
                 break
             else:
-                self.AddSuffixToFiles(counter)
-                counter = counter + 1
-                targetVidPath = os.path.join(targetPath, self.fileName)
+                self.add_suffix_to_files(counter)
+                counter += 1
+                target_vid_path = os.path.join(target_path, self.file_name)
 
-        if moveFiles:
-            print('------ Moving to ' + targetPath)
+        if move_files:
+            print('------ Moving to ' + target_path)
 
-        for file in self.associatedFiles:
-            targetFilePath = os.path.join(targetPath, os.path.basename(file))
+        for file in self.associated_files:
+            target_file_path = os.path.join(target_path, os.path.basename(file))
             # If the file is marked as read-only we remove the read-only flag and then move it.
             if not os.access(file, os.W_OK):
                 os.chmod(file, stat.S_IWUSR)
 
-            if moveFiles:
-                shutil.move(file, targetFilePath)
-                AddFullAccessToFile(targetFilePath)
+            if move_files:
+                shutil.move(file, target_file_path)
+                AddFullAccessToFile(target_file_path)
             else:
                 os.remove(file)
 
-    def Equals(self, otherFileData):
-        return self.fileDir == otherFileData.fileDir and self.fileName == otherFileData.fileName
+    def equals(self, other_file_data):
+        return self.file_dir == other_file_data.fileDir and self.file_name == other_file_data.fileName
+
+    def __eq__(self, other):
+        return self.equals(other)

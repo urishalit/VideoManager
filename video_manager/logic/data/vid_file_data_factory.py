@@ -7,38 +7,38 @@ from episode_data import EpisodeData
 from movie_data import MovieData
 
 
-def GetVidFileData(dir, file, configData):
-    fileDir = dir
-    fileName = file
+def get_vid_file_data(dir, file, config_data):
+    file_dir = dir
+    file_name = file
 
     # 3rd party function to guess according to the file name if movie or tv show
-    fileInfo = guess_file_info(fileName)
-    if None == fileInfo:
+    file_info = guess_file_info(file_name)
+    if None == file_info:
         return None
 
     # According to the guessed type we create the object
-    vidType = fileInfo.get('type', '')
+    vid_type = file_info.get('type', '')
 
-    vidFileData = None
-    if 'episode' == vidType:
+    vid_file_data = None
+    if 'episode' == vid_type:
         # Get Episode information
-        series = fileInfo.get('series', '')
-        season = fileInfo.get('season', '')
-        episodeNumber = fileInfo.get('episodeNumber', '')
+        series = file_info.get('series', '')
+        season = file_info.get('season', '')
+        episode_number = file_info.get('episodeNumber', '')
 
         # Get episode suffix
-        format = fileInfo.get('format', '')
-        basename = os.path.splitext(fileName)[0]
+        format = file_info.get('format', '')
+        basename = os.path.splitext(file_name)[0]
         suffix = basename[basename.lower().find(format.lower()) - 1:]
 
         # Create Episode Data Object
-        vidFileData = EpisodeData(configData, series, season, episodeNumber, fileDir, fileName, suffix)
-    elif 'movie' == vidType:
+        vid_file_data = EpisodeData(config_data, series, season, episode_number, file_dir, file_name, suffix)
+    elif 'movie' == vid_type:
         # Get Movie information
-        title = fileInfo.get('title', '')
-        year = fileInfo.get('year', '')
+        title = file_info.get('title', '')
+        year = file_info.get('year', '')
 
-        # Creeate Movie Data Object
-        vidFileData = MovieData(configData, title, year, fileDir, fileName)
+        # Create Movie Data Object
+        vid_file_data = MovieData(config_data, title, year, file_dir, file_name)
 
-    return vidFileData
+    return vid_file_data

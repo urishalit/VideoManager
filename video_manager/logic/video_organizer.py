@@ -35,8 +35,12 @@ class VideoOrganizer(IVideoOrganizer):
         # Capitalize First letters of every word
         file_name = capitalize_first_letters(directory, file_name)
 
-        # Parse the information from the file name and return an object representing it.
-        vid_file_data = get_vid_file_data(directory, file_name, self.config_data)
+        try:
+            # Parse the information from the file name and return an object representing it.
+            vid_file_data = get_vid_file_data(directory, file_name, self.config_data)
+        except TypeError:
+            print('---- Could not parse and handle file %s' % file_name)
+            return
 
         # Make sure TV file is up to format
         vid_file_data.rename_to_format()

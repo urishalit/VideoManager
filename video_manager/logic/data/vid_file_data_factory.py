@@ -33,6 +33,7 @@ def get_vid_file_data(dir, file, config_data):
 
         # Create Episode Data Object
         vid_file_data = EpisodeData(config_data, series, season, episode_number, file_dir, file_name, suffix)
+
     elif 'movie' == vid_type:
         # Get Movie information
         title = file_info.get('title', '')

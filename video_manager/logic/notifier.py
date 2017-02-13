@@ -58,7 +58,7 @@ class Notifier:
         maps_lock.acquire()
         try:
             self.maps[file_data.get_type()][notify_type].remove(file_data)
-        except KeyError:
+        except (KeyError, ValueError):
             pass
         maps_lock.release()
 

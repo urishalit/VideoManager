@@ -75,7 +75,7 @@ class OpenSubtitles(SubDownloader):
 
     def logout(self):
         try:
-            self.os_proxy.logout(self.token)
+            self.os_proxy.LogOut(self.token)
         except Exception:
             pass
 
@@ -115,7 +115,7 @@ class OpenSubtitles(SubDownloader):
             id_subtitle_file = searchResult['IDSubtitleFile']
 
             # Download the subtitle itself
-            download_result = self.os_proxy.download_subtitles(self.token, [id_subtitle_file])
+            download_result = self.os_proxy.DownloadSubtitles(self.token, [id_subtitle_file])
 
             # Check status
             status = download_result['status']
@@ -134,7 +134,7 @@ class OpenSubtitles(SubDownloader):
             gzip_data = base64.standard_b64decode(base64_data)
 
             # We write the gzip data to a file
-            tmp_file = os.path.join(file_data.fileDir, os.path.basename(file_data.file_name) + '.srt.gzip')
+            tmp_file = os.path.join(file_data.file_dir, os.path.basename(file_data.file_name) + '.srt.gzip')
             fh = open(tmp_file, 'wb')
             fh.write(gzip_data)
             fh.close()

@@ -142,7 +142,7 @@ class VidFileData(object):
                 os.remove(file)
 
     def equals(self, other_file_data):
-        return self.file_dir == other_file_data.fileDir and self.file_name == other_file_data.fileName
+        return self.file_dir == other_file_data.file_dir and self.file_name == other_file_data.file_name
 
     def __eq__(self, other):
         return self.equals(other)

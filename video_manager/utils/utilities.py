@@ -20,17 +20,19 @@ def is_vid_file(file_path):
 
 def get_word_delimiter(base_name):
     first_dot = base_name.find('.')
-    if first_dot < 0:
-        first_dot = len(base_name)
-
     first_space = base_name.find(' ')
-    if first_space < 0:
-        first_space = len(base_name)
+    first_underscore = base_name.find('_')
 
-    if first_dot < first_space:
+    first_underscore = first_underscore if first_underscore >= 0 else len(base_name)
+    first_space = first_space if first_space >= 0 else len(base_name)
+    first_dot = first_dot if first_dot >= 0 else len(base_name)
+
+    if first_dot < first_space and first_dot < first_underscore:
         return '.'
-    elif first_space < first_dot:
+    elif first_space < first_dot and first_space< first_underscore:
         return ' '
+    elif first_underscore < first_dot and first_underscore < first_space:
+        return '_'
     else:
         return ''
 
@@ -40,6 +42,9 @@ def capitalize_first_letters(directory, file_name):
     base = os.path.splitext(file_name)[0]
 
     delimiter = get_word_delimiter(base)
+    if not delimiter:
+        return file_name
+
     new_base = string.capwords(base, delimiter)
 
     src = os.path.abspath(os.path.join(directory, file_name))

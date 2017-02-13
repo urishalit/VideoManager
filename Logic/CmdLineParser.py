@@ -1,12 +1,15 @@
 import sys
 import os.path
 import json
-import traceback
+import argparse
 
 # My files
-from CmdLineConsts import *
+from copy import deepcopy
 
-CONFIGURATION_FILE_NAME = "config.json"
+from CmdLineConsts import *
+from config import CONFIG
+
+CONFIGURATION_FILE_NAME = "config.py"
 
 def GetParameterValue(argName, defaultValue = "", prefix='-', suffix='='):
 	argToFind = prefix + argName + suffix
@@ -125,18 +128,6 @@ def LoadConfigFile(configFile):
 
 	return configData
 
-def GetConfigData():
-	try:
-		# If given a config file path in command line - use it - otherwise look for it in the same directory
-		configFile = GetParameterValue(CMD_ARG_CONFIG_FILE, GetDefaultConfigFilePath())
-		# Load the Config File data
-		configData = LoadConfigFile(configFile)
-	except:
-		print('-- No valid Config file given - using defaults.')
-		traceback.print_exc(file=sys.stdout)
-		configData = dict()
-
-	return configData
 
 def ParseCmdLine():
 	# If we display the help we return without parsing further the command line. As the program should exit.
@@ -152,7 +143,7 @@ def ParseCmdLine():
 		return None
 
 	# Get the configuration data
-	configData = GetConfigData()
+	configData = deepcopy(CONFIG)
 	# Add the action to the configData
 	configData['action'] = action
 

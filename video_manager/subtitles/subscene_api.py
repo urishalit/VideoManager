@@ -39,9 +39,9 @@ class Subscene(object):
 
         def __init__(self, title, page, language, owner, comment, ziplink=False):
 
-            self.title = str(title)
-            self.page = str(page)
-            self.language = str(language)
+            self.title = unicode(title)
+            self.page = unicode(page)
+            self.language = unicode(language)
             self.owner = dict(owner)
             self.comment = unicode(comment)
 
@@ -118,10 +118,10 @@ class Subscene(object):
     class Film:
 
         def __init__(self, title, year, imdb, cover, subtitles):
-            self.title = str(title)
+            self.title = unicode(title)
             self.year = int(year)
-            self.imdb = str(imdb)
-            self.cover = str(cover)
+            self.imdb = unicode(imdb)
+            self.cover = unicode(cover)
             self.subtitles = tuple(subtitles)
 
         def __str__(self):
@@ -208,7 +208,7 @@ class Subscene(object):
 
     @staticmethod
     def __has_table(soup):
-        return 'Subtitle search by' in str(soup)
+        return 'Subtitle search by' in unicode(soup)
 
     @staticmethod
     def __section_exist(soup, section):

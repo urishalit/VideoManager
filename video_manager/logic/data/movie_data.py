@@ -8,7 +8,8 @@ class MovieData(VidFileData):
         self.title = title
         self.year = str(year)
         self.type = VideoType.movie
-        self.initiate_target_directory(config_data['Movies']['TargetDirectory'])
+        if config_data is not None:
+            self.initiate_target_directory(config_data['Movies']['TargetDirectory'])
 
     def get_movie_title(self):
         return self.title

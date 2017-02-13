@@ -1,5 +1,6 @@
 import traceback
 
+from logic import context
 from logic.cmd_line_parser import parse_cmd_line
 from logic.video_organizer import VideoOrganizer
 
@@ -11,6 +12,7 @@ def main():
         config_data = parse_cmd_line()
         if config_data is not None:
             # Start the Video Organizer
+            context.config = config_data
             vid_organizer = VideoOrganizer(config_data)
             vid_organizer.start()
     except Exception:

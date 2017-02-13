@@ -1,11 +1,22 @@
 import os.path
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 
 SearchLanguages = ['en']
+
+sub_downloaders = []
+
+
+def register_sub_downloader(downloader):
+    sub_downloaders.append(downloader)
+    return downloader
 
 
 class SubDownloader(object):
     __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def download_subs(self, file_data, lang):
+        pass
 
     @classmethod
     def get_subtitle_file_path(cls, file_data, lang):

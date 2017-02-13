@@ -8,6 +8,7 @@ import traceback
 import xmlrpclib
 
 from sub_downloader import SubDownloader
+from subtitles.sub_downloader import register_sub_downloader
 
 OpenSubtitlesUrl_Download = 'http://api.opensubtitles.org/xml-rpc'
 
@@ -122,7 +123,7 @@ class OpenSubtitles(SubDownloader):
             if status != '200 OK':
                 continue
 
-            # Update teh video file with the IMDB Id
+            # Update the video file with the IMDB Id
             file_data.imdb_title_id = searchResult['IDMovieImdb']
 
             # The data is returned in base64 format

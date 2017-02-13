@@ -12,7 +12,8 @@ class EpisodeData(VidFileData):
         self.season = '%02d' % season
         self.episode = '%02d' % episode
         self.type = VideoType.tv_show
-        self.initiate_target_directory(config_data['TVShows']['TargetDirectory'])
+        if self.config_data is not None:
+            self.initiate_target_directory(config_data['TVShows']['TargetDirectory'])
 
     def get_series_name(self):
         return self.series.replace('.', ' ')

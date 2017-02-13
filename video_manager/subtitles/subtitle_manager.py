@@ -2,6 +2,11 @@ import os.path
 
 from open_subtitles import OpenSubtitles
 from sub_downloader import SubDownloader
+from subtitles.sub_downloader import sub_downloaders, register_sub_downloader
+from subtitles.subscene import SubSceneWrapper
+
+register_sub_downloader(OpenSubtitles())
+register_sub_downloader(SubSceneWrapper())
 
 
 class SubtitleManager(object):
@@ -20,7 +25,7 @@ class SubtitleManager(object):
 
         # Iterate over all downloaders until all subtitles in all languages are acquired.
         found_languages = []
-        for downloader in self.downloaders:
+        for downloader in sub_downloaders:
             if isinstance(downloader, SubDownloader):
                 for lang in languages:
                     # If exists already a subtitle file for this language - we skip it.

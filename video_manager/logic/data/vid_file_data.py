@@ -22,7 +22,7 @@ class VidFileData(object):
         self.associated_files = []
         self.associated_files.insert(0, self.get_file_path())
         self.base_file_name = os.path.basename(self.file_name)
-        self.working_dir = config_data['WorkingDirectory']
+        self.working_dir = config_data['WorkingDirectory'] if config_data is not None else None
         self.target_root_dir = ''
         self.imdb_title_id = ''
         self.move_files = False

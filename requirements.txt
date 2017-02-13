@@ -1,5 +1,6 @@
 pypiwin32
 httplib2
 supernova
+unrar
 guessit<2
 git+git://github.com:agonzalezro/python-opensubtitles.git#egg=python-opensubtitles

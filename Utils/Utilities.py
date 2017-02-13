@@ -2,6 +2,8 @@ import os, os.path
 import string
 import stat
 import shutil 
+from unrar import rarfile
+import glob
 
 # Known vid extensions
 vidExtenstions = ['.avi','.mkv','.mp4']
@@ -68,3 +70,12 @@ def RemoveNonVideoFilesFromDir(path):
 			shutil.rmtree(path)
 		else:
 			os.remove(path)
+
+
+def unrar_videos(path):
+	rar_files = glob.glob(os.path.join(path, '*.rar'))
+	for rar in rar_files:
+		base_name =  os.path.splitext(rar)[0]
+		if os.path.isfile(base_name + '.r00') and os.path.isfile(base_name + '.r01'):
+			rar_archive = rarfile.RarFile(rar)
+			rar_archive.extractall(path)

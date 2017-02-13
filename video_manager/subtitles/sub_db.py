@@ -6,10 +6,10 @@ from httplib2 import Http
 
 from sub_downloader import SubDownloader
 
-SubDBUrl_Search = "http://api.thesubdb.com/?action=search&hash=HASH_ALIAS"
-SubDBUrl_Download = "http://api.thesubdb.com/?action=download&hash=HASH_ALIAS&language=LANGUAGE_ALIAS"
+SubDBUrl_Search = 'http://api.thesubdb.com/?action=search&hash=HASH_ALIAS'
+SubDBUrl_Download = 'http://api.thesubdb.com/?action=download&hash=HASH_ALIAS&language=LANGUAGE_ALIAS'
 
-MyUserAgent = "SubDB/1.0 (Shalit/0.1; http://none)"
+MyUserAgent = 'SubDB/1.0 (Shalit/0.1; http://none)'
 
 
 class SubDB(SubDownloader):
@@ -34,7 +34,7 @@ class SubDB(SubDownloader):
         url = SubDBUrl_Search.replace('HASH_ALIAS', ep_hash)
 
         # Search for subs
-        resp, content = h.request(url, "GET", headers={'user-agent': MyUserAgent})
+        resp, content = h.request(url, 'GET', headers={'user-agent': MyUserAgent})
         if resp.status != 200:
             return False
 
@@ -49,7 +49,7 @@ class SubDB(SubDownloader):
         # Replace language alias in url
         url = url.replace('LANGUAGE_ALIAS', lang)
         # Download subtitle
-        resp, content = h.request(url, "GET", headers={'user-agent': MyUserAgent})
+        resp, content = h.request(url, 'GET', headers={'user-agent': MyUserAgent})
         if resp.status != 200:
             return False
 

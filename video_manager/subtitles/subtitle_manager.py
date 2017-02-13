@@ -7,7 +7,7 @@ from sub_downloader import SubDownloader
 class SubtitleManager(object):
     def __init__(self, config_data):
         self.config_data = config_data
-        self.languages = self.config_data["SubtitleLanguages"]
+        self.languages = self.config_data['SubtitleLanguages']
         self.downloaders = [OpenSubtitles()]
 
     def download_subtitles(self, file_data):
@@ -42,9 +42,9 @@ class SubtitleManager(object):
         # Only if there are no remaining languages we return True
         if not languages:
             result = True
-            print("------ Successfully downloaded subtitles")
+            print('------ Successfully downloaded subtitles')
         else:
             result = False
-            print("------ Did not find subtitles for " + ','.join(map(str, languages)))
+            print('------ Did not find subtitles for ' + ','.join(map(str, languages)))
 
         return result

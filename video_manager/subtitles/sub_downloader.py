@@ -1,5 +1,5 @@
 import os.path
-from abc import abstractmethod, ABCMeta
+from abc import ABCMeta
 
 SearchLanguages = ['en']
 
@@ -9,7 +9,7 @@ class SubDownloader(object):
 
     @classmethod
     def get_subtitle_file_path(cls, file_data, lang):
-        return os.path.join(file_data.fileDir, file_data.fileName[:file_data.fileName.rfind('.')] + "-" + lang + ".srt")
+        return os.path.join(file_data.fileDir, file_data.fileName[:file_data.fileName.rfind('.')] + '-' + lang + '.srt')
 
     def save_subtitle_file(self, file_data, lang, content):
         # Construct sub file path

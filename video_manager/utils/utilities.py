@@ -29,7 +29,7 @@ def get_word_delimiter(base_name):
 
     if first_dot < first_space and first_dot < first_underscore:
         return '.'
-    elif first_space < first_dot and first_space< first_underscore:
+    elif first_space < first_dot and first_space < first_underscore:
         return ' '
     elif first_underscore < first_dot and first_underscore < first_space:
         return '_'
@@ -88,5 +88,6 @@ def unrar_videos(path):
     for rar in rar_files:
         base_name = os.path.splitext(rar)[0]
         if os.path.isfile(base_name + '.r00') and os.path.isfile(base_name + '.r01'):
+            print('---- Opening rar files (base name: %s)' % base_name)
             rar_archive = rarfile.RarFile(rar)
             rar_archive.extractall(path)

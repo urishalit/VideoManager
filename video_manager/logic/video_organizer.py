@@ -14,7 +14,7 @@ from logic.logic_defs import IVideoOrganizer, workers_lock
 from new_downloads_handler import NewDownloadsHandler
 from notifier import Notifier
 from subtitles.subtitle_manager import SubtitleManager
-from utils.utilities import is_vid_file, capitalize_first_letters
+from utils.utilities import is_vid_file, capitalize_first_letters, unrar_videos, remove_non_video_files_from_dir
 
 
 class VideoOrganizer(IVideoOrganizer):
@@ -28,6 +28,7 @@ class VideoOrganizer(IVideoOrganizer):
     def process_video(self, directory, file_name, is_new_download):
         print('---- Working on ' + file_name)
         # First check if this is actually a video file
+
         if not is_vid_file(file_name):
             print('---- Not supporting movie files yet: ' + file_name)
             return
@@ -72,6 +73,9 @@ class VideoOrganizer(IVideoOrganizer):
             for _file in os.listdir(self.working_dir):
                 path = os.path.join(self.working_dir, _file)
                 if os.path.isdir(path):
+                    unrar_videos(path)
+                    remove_non_video_files_from_dir(path)
+
                     # If it is a directory we check if it is empty - if it is - we delete it.
                     if len(os.listdir(path)) == 0:
                         # If the file is read only we remove the read only flag as we are about to delete it

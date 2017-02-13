@@ -82,8 +82,6 @@ class NewDownloadsHandler(IFileChangeRecipient):
                 print('---- Copying ' + path + ' to ' + new_path)
                 if os.path.isdir(path):
                     shutil.copytree(path, new_path)
-                    unrar_videos(new_path)
-                    remove_non_video_files_from_dir(new_path)
                 elif os.path.isfile(path):
                     shutil.copyfile(path, new_path)
             else:

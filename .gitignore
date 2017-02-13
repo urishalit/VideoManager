@@ -1,3 +1,4 @@
 DownloadDirFiles
-*.pyc
+**/*.pyc
 .idea/
+**/*.egg-info/

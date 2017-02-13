@@ -2,8 +2,8 @@ import os.path
 import os
 
 #My Files
-from VidFileData import VidFileData
-from VidFileData import VideoType
+from vid_file_data import VidFileData
+from vid_file_data import VideoType
 
 class MovieData(VidFileData):
 	def __init__(self, configData, title, year, fileDir, fileName):

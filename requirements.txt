@@ -4,4 +4,5 @@ supernova
 unrar
 guessit<2
 enum34
+futures=3.0.5
 #git+git://github.com:agonzalezro/python-opensubtitles.git#egg=python-opensubtitles

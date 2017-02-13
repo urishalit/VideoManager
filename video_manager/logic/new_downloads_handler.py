@@ -4,8 +4,7 @@ import pickle
 import shutil
 import sys
 import traceback
-from threading import Thread
-
+from concurrent.futures import ThreadPoolExecutor
 from logic.logic_defs import workers_lock
 from utils.file_listener import IFileChangeRecipient, FileListener
 
@@ -20,6 +19,7 @@ class NewDownloadsHandler(IFileChangeRecipient):
         self.file_listener = FileListener(self.download_dir, self)
         self.run = True
         self.scan_event = scan_event
+        self.executor = ThreadPoolExecutor(max_workers=3)
 
     def start(self):
         # Start file listener
@@ -30,8 +30,7 @@ class NewDownloadsHandler(IFileChangeRecipient):
 
     def on_file_change(self, file_path, action):
         print('-- ' + file_path + ' ' + action)
-        thread = Thread(target=self.worker_thread, args=(file_path,))
-        thread.start()
+        self.executor.submit(self.worker_thread, file_path)
 
     @staticmethod
     def save_download_dir_file_list(files):

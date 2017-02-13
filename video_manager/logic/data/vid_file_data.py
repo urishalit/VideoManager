@@ -9,7 +9,7 @@ from utils.file_security import AddFullAccessToFile
 
 
 class VideoType(Enum):
-    tvShow = 1
+    tv_show = 1
     movie = 2
 
 
@@ -70,7 +70,7 @@ class VidFileData(object):
         return VideoType.movie == self.type
 
     def is_tv_show(self):
-        return VideoType.tvShow == self.type
+        return VideoType.tv_show == self.type
 
     def get_type(self):
         return self.type

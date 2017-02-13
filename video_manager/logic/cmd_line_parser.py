@@ -4,26 +4,26 @@ import sys
 from copy import deepcopy
 
 from cmd_line_consts import *
-from video_manager.config import CONFIG
+from config import CONFIG
 
 CONFIGURATION_FILE_NAME = "config.py"
 
 
-def GetParameterValue(argName, defaultValue="", prefix='-', suffix='='):
-    argToFind = prefix + argName + suffix
+def get_parameter_value(arg_name, default_value=None, prefix='-', suffix='='):
+    arg_to_find = prefix + arg_name + suffix
     for arg in sys.argv:
-        index = arg.find(argToFind)
+        index = arg.find(arg_to_find)
         if index > -1:
-            value = arg[index + len(argToFind):]
+            value = arg[index + len(arg_to_find):]
             if len(value) == 0:
                 return True
             else:
                 return value
 
-    return defaultValue
+    return default_value
 
 
-def DisplayHelp():
+def display_help():
     print('     Video Manager')
     print('  -------------------')
     print('Video Manager is a program designed to help you organize your videos (TV Shows & Movies).')
@@ -83,27 +83,27 @@ def DisplayHelp():
     print('')
 
 
-def DisplayConfigHelp():
+def display_config_help():
     print('ConfigHelp: TBD')
 
 
-def DisplayHelpIfNeeded():
-    # First check if the genereal is help was asked for
-    isHelp = GetParameterValue('help', False, '-', '')
+def display_help_if_needed():
+    # First check if the general is help was asked for
+    isHelp = get_parameter_value('help', False, '-', '')
     if isHelp:
-        DisplayHelp()
+        display_help()
         return True
 
     # Then check if the config help was asked for
-    isConfigHelp = GetParameterValue('confighelp', False, '-', '')
+    isConfigHelp = get_parameter_value('confighelp', False, '-', '')
     if isConfigHelp:
-        DisplayConfigHelp()
+        display_config_help()
         return True
 
     return False
 
 
-def GetDefaultConfigFilePath():
+def get_default_config_file_path():
     dir = os.path.dirname(sys.argv[0])
     if dir == '':
         dir = os.getcwd()
@@ -111,89 +111,89 @@ def GetDefaultConfigFilePath():
     return os.path.join(dir, CONFIGURATION_FILE_NAME)
 
 
-def LoadConfigFile(configFile):
+def load_config_file(config_file):
     # if no config file - display error and exit
-    if not os.path.isfile(configFile):
-        print(configFile + " does not exist.")
+    if not os.path.isfile(config_file):
+        print(config_file + " does not exist.")
         sys.exit()
 
     # Read config file data
-    hFile = open(configFile, 'r')
-    configStr = hFile.read()
-    hFile.close()
+    h_file = open(config_file, 'r')
+    config_str = h_file.read()
+    h_file.close()
 
     # Parse config data
     try:
-        configData = json.loads(configStr)
+        config_data = json.loads(config_str)
     except:
         print('Invalid config data - error parsing. ')
         raise
 
-    return configData
+    return config_data
 
 
-def ParseCmdLine():
+def parse_cmd_line():
     # If we display the help we return without parsing further the command line. As the program should exit.
-    if DisplayHelpIfNeeded():
+    if display_help_if_needed():
         return None
 
     try:
-        actionName = GetParameterValue(CMD_ARG_ACTION, Actions.full.name)
+        action_name = get_parameter_value(CMD_ARG_ACTION, Actions.full.name)
         # Get the action requested
-        action = Actions[actionName]
-    except:
-        print('ERROR: Unknown action: ' + actionName)
+        action = Actions[action_name]
+    except Exception:
+        print('ERROR: Unknown action: ' + action_name)
         return None
 
     # Get the configuration data
-    configData = deepcopy(CONFIG)
+    config_data = deepcopy(CONFIG)
     # Add the action to the configData
-    configData['action'] = action
+    config_data['action'] = action
 
     # Initiate directories to blank
-    downloadDir = ''
-    workingDir = ''
-    showsDir = ''
-    moviesDir = ''
+    download_dir = ''
+    working_dir = ''
+    shows_dir = ''
+    movies_dir = ''
 
     # Given the folder argument all directories will be set by default to this folder
-    folder = GetParameterValue(CMD_ARG_FOLDER)
+    folder = get_parameter_value(CMD_ARG_FOLDER)
     if len(folder) > 0:
-        downloadDir = folder
-        workingDir = folder
-        showsDir = folder
-        moviesDir = folder
+        download_dir = folder
+        working_dir = folder
+        shows_dir = folder
+        movies_dir = folder
 
     # Check if there is a download directory to override the one in the config file
-    downloadDir = GetParameterValue(CMD_ARG_DOWNLOAD_DIR, downloadDir)
-    if len(downloadDir) > 0:
-        configData["DownloadDirectory"] = downloadDir
+    download_dir = get_parameter_value(CMD_ARG_DOWNLOAD_DIR, download_dir)
+    if len(download_dir) > 0:
+        config_data["DownloadDirectory"] = download_dir
 
     # Check if there is a working directory to override the one in the config file
-    workingDir = GetParameterValue(CMD_ARG_WORKING_DIR, workingDir)
-    if len(workingDir) > 0:
-        configData["WorkingDirectory"] = workingDir
+    working_dir = get_parameter_value(CMD_ARG_WORKING_DIR, working_dir)
+    if len(working_dir) > 0:
+        config_data["WorkingDirectory"] = working_dir
 
     # Check if there is a shows target directory to override the one in the config file
-    showsDir = GetParameterValue(CMD_ARG_SHOWS_DIR, showsDir)
-    if len(showsDir) > 0:
-        configData["TVShows"]["TargetDirectory"] = showsDir
+    shows_dir = get_parameter_value(CMD_ARG_SHOWS_DIR, shows_dir)
+    if len(shows_dir) > 0:
+        config_data["TVShows"]["TargetDirectory"] = shows_dir
 
     # Check if there is a shows target directory to override the one in the config file
-    moviesDir = GetParameterValue(CMD_ARG_MOVIES_DIR, moviesDir)
-    if len(moviesDir) > 0:
-        configData["Movies"]["TargetDirectory"] = moviesDir
+    movies_dir = get_parameter_value(CMD_ARG_MOVIES_DIR, movies_dir)
+    if len(movies_dir) > 0:
+        config_data["Movies"]["TargetDirectory"] = movies_dir
 
-    noemails = GetParameterValue(CMD_ARG_NO_EMAIL, False, '-', '')
-    emails = GetParameterValue(CMD_ARG_EMAILS)
+    no_emails = get_parameter_value(CMD_ARG_NO_EMAIL, False, '-', '')
+    emails = get_parameter_value(CMD_ARG_EMAILS)
 
-    if noemails and len(emails) > 0:
+    if no_emails and len(emails) > 0:
         print('ERROR: Cannot use no emails flags with the emails flag - Contracdiction!')
         return None
 
     # If user defined not to send emails - we override the email list by an empty list
-    if noemails:
-        configData['Emails'] = []
+    if no_emails:
+        config_data['Emails'] = []
 
     # If user defined emails to send to - we override the email list given in the config file
     if len(emails) > 0:
@@ -203,6 +203,6 @@ def ParseCmdLine():
         else:
             emails = [emails]
 
-        configData['Emails'] = emails
+        config_data['Emails'] = emails
 
-    return configData
+    return config_data

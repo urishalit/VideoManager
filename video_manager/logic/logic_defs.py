@@ -1,9 +1,14 @@
 import threading
 
 # Lock so Scan Thread and worker thread won't work together.
-workersLock = threading.Lock()
+from abc import ABCMeta, abstractmethod
+
+workers_lock = threading.Lock()
 
 
-class IVideoOrganizer:
-    def ProcessVideo(self, dir, file, isNewDownload):
-        raise NotImplementedError("Should have implemented this")
+class IVideoOrganizer(object):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def process_video(self, directory, file_name, is_new_download):
+        pass

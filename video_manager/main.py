@@ -3,7 +3,7 @@ import os.path
 import traceback
 
 # Add paths of scripts to paths Python looks for scripts in.
-from logic.cmd_line_parser import ParseCmdLine
+from logic.cmd_line_parser import parse_cmd_line
 
 from logic import video_organizer
 
@@ -17,11 +17,11 @@ def main():
     vid_organizer = None
     try:
         # Load the Config File data
-        configData = ParseCmdLine()
+        configData = parse_cmd_line()
         if None != configData:
             # Start the Video Organizer
             vid_organizer = video_organizer(configData)
-            vid_organizer.Start()
+            vid_organizer.start()
     except Exception:
         print('Exiting due to error...')
         traceback.print_exc()

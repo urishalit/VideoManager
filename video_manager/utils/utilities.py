@@ -11,7 +11,7 @@ vidExtenstions = ['.avi', '.mkv', '.mp4']
 MIN_VID_SIZE_BYTE = 2000000
 
 
-def IsVidFile(file):
+def is_vid_file(file):
     ext = os.path.splitext(file)[1]
     return ext in vidExtenstions
 
@@ -33,7 +33,7 @@ def GetWordDelimiter(baseName):
         return ''
 
 
-def CaptalizeFirstLetters(dir, file):
+def captalize_first_letters(dir, file):
     ext = os.path.splitext(file)[1]
     base = os.path.splitext(file)[0]
 
@@ -51,7 +51,7 @@ def CaptalizeFirstLetters(dir, file):
 def RemoveNonVideoFilesFromDir(path):
     remove = False
     if not os.path.isdir(path):
-        if not IsVidFile(path):
+        if not is_vid_file(path):
             remove = True
         if os.path.getsize(path) < MIN_VID_SIZE_BYTE:
             remove = True

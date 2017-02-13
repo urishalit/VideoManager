@@ -10,63 +10,63 @@ from threading import Timer
 
 from logic.cmd_line_consts import Actions
 from logic.data.vid_file_data_factory import get_vid_file_data
-from logic.logic_defs import IVideoOrganizer, workersLock
+from logic.logic_defs import IVideoOrganizer, workers_lock
 from new_downloads_handler import NewDownloadsHandler
 from notifier import Notifier
-from subtitles import subtitle_manager
-from utils.utilities import IsVidFile, CaptalizeFirstLetters
+from subtitles.subtitle_manager import SubtitleManager
+from utils.utilities import is_vid_file, captalize_first_letters
 
 
 class VideoOrganizer(IVideoOrganizer):
-    def Process(self, path, isNewDownload=False):
+    def process(self, path, is_new_download=False):
         if os.path.isdir(path):
-            for file in os.listdir(path):
-                self.Process(os.path.join(path, file), isNewDownload)
+            for _file in os.listdir(path):
+                self.process(os.path.join(path, _file), is_new_download)
         else:
-            self.ProcessVideo(os.path.dirname(path), os.path.basename(path), isNewDownload)
+            self.process_video(os.path.dirname(path), os.path.basename(path), is_new_download)
 
-    def ProcessVideo(self, dir, file, isNewDownload):
-        print("---- Working on " + file)
+    def process_video(self, directory, file_name, is_new_download):
+        print("---- Working on " + file_name)
         # First check if this is actually a video file
-        if not IsVidFile(file):
-            print("---- Not supporting movie files yet: " + file)
+        if not is_vid_file(file_name):
+            print("---- Not supporting movie files yet: " + file_name)
             return
 
-        # Capitize First letters of every word
-        file = CaptalizeFirstLetters(dir, file)
+        # Capitalize First letters of every word
+        file_name = captalize_first_letters(directory, file_name)
 
-        # Parse the infomrmation from the file name and return an object representing it.
-        vidFileData = get_vid_file_data(dir, file, self.configData)
+        # Parse the information from the file name and return an object representing it.
+        vid_file_data = get_vid_file_data(directory, file_name, self.config_data)
 
         # Make sure TV file is up to format
-        vidFileData.rename_to_format()
+        vid_file_data.rename_to_format()
 
-        if isNewDownload:
+        if is_new_download:
             # This should happen only once per video
-            self.notifier.AddDownloadedFile(vidFileData)
+            self.notifier.add_downloaded_file(vid_file_data)
 
         # Download subtitles for TV show
-        result = self.subtitleManager.DownloadSubtitles(vidFileData)
-        if result == True:
+        result = self.subtitleManager.DownloadSubtitles(vid_file_data)
+        if result:
             # Move files and associates to proper location
-            vidFileData.move_to_target_directory()
+            vid_file_data.move_to_target_directory()
             # Add to Notifier as ready episode
-            self.notifier.AddReadyFile(vidFileData)
+            self.notifier.add_ready_file(vid_file_data)
         else:
             # Add to Notifier as in staging episode
-            self.notifier.AddStagingFile(vidFileData)
+            self.notifier.add_staging_file(vid_file_data)
 
-    def ScanThread(self):
+    def scan_thread(self):
         if not self.run:
             return
         try:
             print('-- Scanner Thread initiated --')
             # Lock - so both threads won't accidetnly work on the same file/s
-            workersLock.acquire()
+            workers_lock.acquire()
 
             # Scan all files in working dir and see if we can make any ready
-            for file in os.listdir(self.workingDir):
-                path = os.path.join(self.workingDir, file)
+            for _file in os.listdir(self.working_dir):
+                path = os.path.join(self.working_dir, _file)
                 if os.path.isdir(path):
                     # If it is a directory we check if it is empty - if it is - we delete it.
                     if len(os.listdir(path)) == 0:
@@ -76,26 +76,26 @@ class VideoOrganizer(IVideoOrganizer):
                         # Remove it
                         shutil.rmtree(path)
                 # Process the file/directory
-                self.Process(os.path.join(self.workingDir, file))
+                self.process(os.path.join(self.working_dir, _file))
 
             # Send Notification (email) if there is any new news to update
-            self.notifier.SendNotifications()
+            self.notifier.send_notifications()
 
             # Schedule the next scan
-            self.scanThread = Timer(self.scanIntervalSec, self.ScanThread)
+            self.scanThread = Timer(self.scanIntervalSec, self.scan_thread)
             self.scanThread.start()
 
             # Release the lock - so the worker can work if it needs to
-            workersLock.release()
+            workers_lock.release()
             print('-- Scanner Thread terminated --')
         except Exception:
             print("-- ERROR: Exception raised in scanner thread")
             traceback.print_exc(file=sys.stdout)
             print('-' * 60)
 
-    def StartFully(self):
+    def start_fully(self):
         # Start new downloads listener
-        self.newDownloadsHandler.Start()
+        self.newDownloadsHandler.start()
 
         # Start Scanner Thread
         self.scanThread.start()
@@ -103,39 +103,39 @@ class VideoOrganizer(IVideoOrganizer):
         while True:
             try:
                 time.sleep(30)
-            except:
-                self.Stop()
+            except Exception:
+                self.stop()
                 break
 
-    def ScanDir(self):
-        print('-- Scanning Directory ' + self.workingDir)
-        self.Process(self.workingDir)
-        self.notifier.SendNotifications()
+    def scan_dir(self):
+        print('-- Scanning Directory ' + self.working_dir)
+        self.process(self.working_dir)
+        self.notifier.send_notifications()
         print('-- Scan completed.')
 
-    def Start(self):
-        action = self.configData['action']
+    def start(self):
+        action = self.config_data['action']
 
         if Actions.full == action:
-            self.StartFully()
+            self.start_fully()
         elif Actions.init_dir == action:
-            self.newDownloadsHandler.InitDir()
+            self.newDownloadsHandler.init_dir()
         elif Actions.scan_dir == action:
-            self.ScanDir()
+            self.scan_dir()
         else:
             print('ERROR: Unknown action: Should never get here')
 
-    def Stop(self):
+    def stop(self):
         self.run = False
         self.newDownloadsHandler.stop()
 
-    def __init__(self, configData):
-        self.configData = configData
-        self.subtitleManager = subtitle_manager(configData)
-        self.workingDir = configData["WorkingDirectory"]
-        self.downloadDir = configData["DownloadDirectory"]
-        self.scanIntervalSec = configData["ScanIntervalSec"]
-        self.notifier = Notifier(configData)
-        self.scanThread = Thread(target=self.ScanThread)
-        self.newDownloadsHandler = NewDownloadsHandler(self, self.downloadDir, self.workingDir)
+    def __init__(self, config_data):
+        self.config_data = config_data
+        self.subtitleManager = SubtitleManager(config_data)
+        self.working_dir = config_data["WorkingDirectory"]
+        self.downloadDir = config_data["DownloadDirectory"]
+        self.scanIntervalSec = config_data["ScanIntervalSec"]
+        self.notifier = Notifier(config_data)
+        self.scanThread = Thread(target=self.scan_thread)
+        self.newDownloadsHandler = NewDownloadsHandler(self, self.downloadDir, self.working_dir)
         self.run = True

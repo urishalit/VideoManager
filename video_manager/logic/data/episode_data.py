@@ -11,7 +11,7 @@ class EpisodeData(VidFileData):
         self.series = str(series)
         self.season = '%02d' % season
         self.episode = '%02d' % episode
-        self.type = VideoType.tvShow
+        self.type = VideoType.tv_show
         self.initiate_target_directory(config_data['TVShows']['TargetDirectory'])
 
     def get_series_name(self):

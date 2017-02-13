@@ -19,11 +19,11 @@ STOP_FILE = 'STOP_LISTENER_FILE'
 
 
 class IFileChangeRecipient:
-    def OnFileChange(self, filePath, action):
+    def on_file_change(self, filePath, action):
         raise NotImplementedError("Should have implemented this")
 
 
-class FileListener:
+class FileListener(object):
     def __init__(self, pathToWatch, sink):
         self.run = True
         self.pathToWatch = pathToWatch
@@ -57,7 +57,7 @@ class FileListener:
                     filePath = os.path.join(self.pathToWatch, file)
                     # TODO - Change to real logic!
                     time.sleep(1)
-                    self.sink.OnFileChange(filePath, FILE_ACTIONS.get(action, "Unknown"))
+                    self.sink.on_file_change(filePath, FILE_ACTIONS.get(action, "Unknown"))
 
     def Start(self):
         self.listenerThread = Thread(target=self.ListenerThread)

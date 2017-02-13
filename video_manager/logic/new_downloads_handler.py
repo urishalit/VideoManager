@@ -6,92 +6,89 @@ import sys
 import traceback
 from threading import Thread
 
-# Name of file to save image of files in Download directory
-from logic.logic_defs import workersLock
-from utils import file_listener
-from utils.file_listener import IFileChangeRecipient
+from logic.logic_defs import workers_lock
+from utils.file_listener import IFileChangeRecipient, FileListener
 from utils.utilities import unrar_videos, RemoveNonVideoFilesFromDir
 
 DOWNLOAD_DIR_FILES_LIST_FILE_NAME = 'DownloadDirFiles'
 
 
 class NewDownloadsHandler(IFileChangeRecipient):
-    def __init__(self, organizer, downloadDir, workingDir):
-        self.downloadDir = downloadDir
-        self.workingDir = workingDir
+    def __init__(self, organizer, download_dir, working_dir):
+        self.download_dir = download_dir
+        self.working_dir = working_dir
         self.organizer = organizer
-        self.fileListener = file_listener(self.downloadDir, self)
+        self.file_listener = FileListener(self.download_dir, self)
         self.run = True
 
-    def Start(self):
+    def start(self):
         # Start file listener
-        self.fileListener.Start()
+        self.file_listener.Start()
 
         # Check if there are new files in the Download directory since last time
-        self.CheckForNewFilesSinceLastTime()
+        self.check_for_new_files_since_last_time()
 
-    def OnFileChange(self, filePath, action):
-        print("-- " + filePath + " " + action)
-        thread = Thread(target=self.WorkerThread, args=(filePath,))
+    def on_file_change(self, file_path, action):
+        print("-- " + file_path + " " + action)
+        thread = Thread(target=self.worker_thread, args=(file_path,))
         thread.start()
 
-    def SaveDownloadDirFileList(self, files):
+    def save_download_dir_file_list(self, files):
         with open(os.path.join(os.getcwd(), DOWNLOAD_DIR_FILES_LIST_FILE_NAME), 'wb') as h:
             pickle.dump(files, h)
 
-    def GetDownloadDirFileList(self):
+    def get_download_dir_file_list(self):
         try:
             with open(os.path.join(os.getcwd(), DOWNLOAD_DIR_FILES_LIST_FILE_NAME), 'rb') as h:
                 return pickle.load(h)
         except Exception:
             return []
 
-    def InitDir(self):
-        print('-- Directory: ' + self.downloadDir)
-        files = os.listdir(self.downloadDir)
-        self.SaveDownloadDirFileList(files)
+    def init_dir(self):
+        print('-- Directory: ' + self.download_dir)
+        files = os.listdir(self.download_dir)
+        self.save_download_dir_file_list(files)
         print('-- Directory contenets saved')
 
-    def CheckForNewFilesSinceLastTime(self):
+    def check_for_new_files_since_last_time(self):
         # Check if there are new files in the Download directory
-        currFiles = os.listdir(self.downloadDir)
-        prevFiles = self.GetDownloadDirFileList()
+        curr_files = os.listdir(self.download_dir)
+        prev_files = self.get_download_dir_file_list()
         # Get the difference in the files image in the download directory
-        diffFiles = list(set(currFiles) - set(prevFiles))
-        for file in diffFiles:
-            self.OnFileChange(os.path.join(self.downloadDir, file), "Created")
+        diff_files = list(set(curr_files) - set(prev_files))
+        for _file in diff_files:
+            self.on_file_change(os.path.join(self.download_dir, _file), "Created")
         # Save the current image of the files
-        self.SaveDownloadDirFileList(currFiles)
+        self.save_download_dir_file_list(curr_files)
 
     def stop(self):
         self.run = False
-        self.fileListener.stop()
+        self.file_listener.stop()
 
-    def WorkerThread(self, path):
+    def worker_thread(self, path):
         try:
             if not self.run:
                 return
 
             print('-- Worker Thread initiated --')
-            workersLock.acquire()
+            workers_lock.acquire()
             # Update directory listing of files
-            self.InitDir()
+            self.init_dir()
 
-            newPath = os.path.join(self.workingDir, os.path.basename(path))
-            if self.workingDir != self.downloadDir:
-                newPath = os.path.join(self.workingDir, os.path.basename(path))
-                print('---- Copying ' + path + ' to ' + newPath)
+            if self.working_dir != self.download_dir:
+                new_path = os.path.join(self.working_dir, os.path.basename(path))
+                print('---- Copying ' + path + ' to ' + new_path)
                 if os.path.isdir(path):
-                    shutil.copytree(path, newPath)
-                    unrar_videos(newPath)
-                    RemoveNonVideoFilesFromDir(newPath)
+                    shutil.copytree(path, new_path)
+                    unrar_videos(new_path)
+                    RemoveNonVideoFilesFromDir(new_path)
                 elif os.path.isfile(path):
-                    shutil.copyfile(path, newPath)
+                    shutil.copyfile(path, new_path)
             else:
-                newPath = path
+                new_path = path
 
-            self.organizer.Process(newPath, True)
-            workersLock.release()
+            self.organizer.process(new_path, True)
+            workers_lock.release()
             print('-- Worker Thread terminated --')
         except Exception:
             print("-- ERROR: Exception raised in worker thread")

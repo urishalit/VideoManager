@@ -8,18 +8,18 @@ from threading import Thread
 
 from logic.logic_defs import workers_lock
 from utils.file_listener import IFileChangeRecipient, FileListener
-from utils.utilities import unrar_videos, remove_non_video_files_from_dir
 
 DOWNLOAD_DIR_FILES_LIST_FILE_NAME = 'DownloadDirFiles'
 
 
 class NewDownloadsHandler(IFileChangeRecipient):
-    def __init__(self, organizer, download_dir, working_dir):
+    def __init__(self, organizer, download_dir, working_dir, scan_event):
         self.download_dir = download_dir
         self.working_dir = working_dir
         self.organizer = organizer
         self.file_listener = FileListener(self.download_dir, self)
         self.run = True
+        self.scan_event = scan_event
 
     def start(self):
         # Start file listener
@@ -69,11 +69,13 @@ class NewDownloadsHandler(IFileChangeRecipient):
 
     def worker_thread(self, path):
         try:
+            # The worker is considered a reader as it moves one file from the download dir to the workdir without
+            # touching other files, therefore many worker threads can work simultaneously
+            workers_lock.reader_acquire()
             if not self.run:
                 return
 
             print('-- Worker Thread initiated --')
-            workers_lock.acquire()
             # Update directory listing of files
             self.init_dir()
 
@@ -84,13 +86,13 @@ class NewDownloadsHandler(IFileChangeRecipient):
                     shutil.copytree(path, new_path)
                 elif os.path.isfile(path):
                     shutil.copyfile(path, new_path)
-            else:
-                new_path = path
 
-            self.organizer.process(new_path, True)
-            workers_lock.release()
+                print('---- Notifying scanner of new file')
+                self.scan_event.set()
             print('-- Worker Thread terminated --')
         except Exception:
             print('-- ERROR: Exception raised in worker thread')
             traceback.print_exc(file=sys.stdout)
             print('-' * 60)
+        finally:
+            workers_lock.reader_release()

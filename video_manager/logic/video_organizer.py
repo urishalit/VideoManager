@@ -2,11 +2,10 @@ import os
 import os.path
 import shutil
 import stat
-import sys
+import threading
 import time
 import traceback
 from threading import Thread
-from threading import Timer
 
 from logic.cmd_line_consts import Actions
 from logic.data.vid_file_data_factory import get_vid_file_data
@@ -51,7 +50,7 @@ class VideoOrganizer(IVideoOrganizer):
             self.notifier.add_downloaded_file(vid_file_data)
 
         # Download subtitles for TV show
-        result = self.subtitleManager.download_subtitles(vid_file_data)
+        result = self.subtitle_manager.download_subtitles(vid_file_data)
         if result:
             # Move files and associates to proper location
             vid_file_data.move_to_target_directory()
@@ -62,56 +61,58 @@ class VideoOrganizer(IVideoOrganizer):
             self.notifier.add_staging_file(vid_file_data)
 
     def scan_thread(self):
-        if not self.run:
-            return
-        try:
-            print('-- Scanner Thread initiated --')
-            # Lock - so both threads won't accidetnly work on the same file/s
-            workers_lock.acquire()
+        while self.run:
+            try:
+                print('-- Scanner Thread: Starting loop --')
+                # Lock - so both threads won't accidence work on the same file/s
+                # The scan dir is a writer as it touches all files and moves them around, no new file can be handled in
+                # the midst of a scan
+                workers_lock.writer_acquire()
 
-            # Scan all files in working dir and see if we can make any ready
-            for _file in os.listdir(self.working_dir):
-                path = os.path.join(self.working_dir, _file)
-                if os.path.isdir(path):
-                    unrar_videos(path)
-                    remove_non_video_files_from_dir(path)
+                # Scan all files in working dir and see if we can make any ready
+                for _file in os.listdir(self.working_dir):
+                    path = os.path.join(self.working_dir, _file)
+                    if os.path.isdir(path):
+                        unrar_videos(path)
+                        remove_non_video_files_from_dir(path)
 
-                    # If it is a directory we check if it is empty - if it is - we delete it.
-                    if len(os.listdir(path)) == 0:
-                        # If the file is read only we remove the read only flag as we are about to delete it
-                        if not os.access(path, os.W_OK):
-                            os.chmod(path, stat.S_IWUSR)
-                        # Remove it
-                        shutil.rmtree(path)
-                # Process the file/directory
-                self.process(os.path.join(self.working_dir, _file))
+                        # If it is a directory we check if it is empty - if it is - we delete it.
+                        if len(os.listdir(path)) == 0:
+                            # If the file is read only we remove the read only flag as we are about to delete it
+                            if not os.access(path, os.W_OK):
+                                os.chmod(path, stat.S_IWUSR)
+                            # Remove it
+                            shutil.rmtree(path)
+                    # Process the file/directory
+                    self.process(os.path.join(self.working_dir, _file))
 
-            # Send Notification (email) if there is any new news to update
-            self.notifier.send_notifications()
+                # Send Notification (email) if there is any new news to update
+                self.notifier.send_notifications()
+
+                print('-- Scanner Thread: loop ended --')
+            except Exception:
+                print('-- ERROR: Exception raised in scanner thread')
+                traceback.print_exc()
+                print('-' * 60)
+            finally:
+                workers_lock.writer_release()
 
             # Schedule the next scan
-            self.scanThread = Timer(self.scanIntervalSec, self.scan_thread)
-            self.scanThread.start()
-
-            # Release the lock - so the worker can work if it needs to
-            workers_lock.release()
-            print('-- Scanner Thread terminated --')
-        except Exception:
-            print('-- ERROR: Exception raised in scanner thread')
-            traceback.print_exc(file=sys.stdout)
-            print('-' * 60)
+            self.scan_event.wait(timeout=self.scan_interval_sec)
+            self.scan_event.clear()
 
     def start_fully(self):
         # Start new downloads listener
         self.new_downloads_handler.start()
 
         # Start Scanner Thread
-        self.scanThread.start()
+        self.scan_thread_obj.start()
 
         while True:
             try:
                 time.sleep(30)
             except Exception:
+                traceback.print_exc()
                 self.stop()
                 break
 
@@ -139,11 +140,13 @@ class VideoOrganizer(IVideoOrganizer):
 
     def __init__(self, config_data):
         self.config_data = config_data
-        self.subtitleManager = SubtitleManager(config_data)
+        self.subtitle_manager = SubtitleManager(config_data)
         self.working_dir = config_data['WorkingDirectory']
-        self.downloadDir = config_data['DownloadDirectory']
-        self.scanIntervalSec = config_data['ScanIntervalSec']
+        self.download_dir = config_data['DownloadDirectory']
+        self.scan_interval_sec = config_data['ScanIntervalSec']
         self.notifier = Notifier(config_data)
-        self.scanThread = Thread(target=self.scan_thread)
-        self.new_downloads_handler = NewDownloadsHandler(self, self.downloadDir, self.working_dir)
+        self.scan_event = threading.Event()
+        self.scan_thread_obj = Thread(target=self.scan_thread)
+        self.new_downloads_handler = NewDownloadsHandler(self, self.download_dir, self.working_dir,
+                                                         self.scan_event)
         self.run = True

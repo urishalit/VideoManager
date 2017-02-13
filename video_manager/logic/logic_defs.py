@@ -1,9 +1,9 @@
-import threading
-
 # Lock so Scan Thread and worker thread won't work together.
 from abc import ABCMeta, abstractmethod
 
-workers_lock = threading.Lock()
+from utils.rw_lock import RWLock
+
+workers_lock = RWLock()
 
 
 class IVideoOrganizer(object):

@@ -32,7 +32,7 @@ class FileListener(object):
         self.run = True
         self.path_to_watch = path_to_watch
         self.sink = sink
-        self.listener_thread = None
+        self.listener_thread_obj = None
         if not os.path.isdir(self.path_to_watch):
             msg = '-- ERROR: Download Directory does not exist (' + self.path_to_watch + ')'
             raise Exception(msg)
@@ -70,8 +70,8 @@ class FileListener(object):
                     self.sink.on_file_change(file_path, FILE_ACTIONS.get(action, 'Unknown'))
 
     def start(self):
-        self.listener_thread = Thread(target=self.listener_thread)
-        self.listener_thread.start()
+        self.listener_thread_obj = Thread(target=self.listener_thread)
+        self.listener_thread_obj.start()
 
     def stop(self):
         self.run = False

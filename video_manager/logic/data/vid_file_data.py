@@ -52,6 +52,16 @@ class VidFileData(object):
         self.add_associated_file(self.get_file_path())
 
         # Rename file
+        new_path = self.get_file_path()
+        if new_path == curr_path:
+            return
+
+        if new_path.lower() == curr_path.lower():
+            # For some reason when all we do is change case of letters it fails, so we move through a temp file
+            tmp_path = curr_path + '.tmp'
+            os.rename(curr_path, tmp_path)
+            curr_path = tmp_path
+
         os.rename(curr_path, self.get_file_path())
 
     def add_suffix_to_files(self, suffix):

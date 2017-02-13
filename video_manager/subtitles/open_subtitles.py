@@ -63,13 +63,13 @@ class OpenSubtitles(SubDownloader):
 
     def login(self):
         # Log in to server
-        login_data = self.os_proxy.login(OpenSubtitlesUrl_UserName, OpenSubtitlesUrl_Password, 'eng',
+        login_data = self.os_proxy.LogIn(OpenSubtitlesUrl_UserName, OpenSubtitlesUrl_Password, 'eng',
                                          OpenSubtitlesUrl_UserAgent)
 
         # Check status
         status = login_data['status']
         if status != '200 OK':
-            raise
+            raise Exception('Failed to login to open subtitles')
 
         self.token = login_data['token']
 
@@ -134,7 +134,7 @@ class OpenSubtitles(SubDownloader):
             gzip_data = base64.standard_b64decode(base64_data)
 
             # We write the gzip data to a file
-            tmp_file = os.path.join(file_data.fileDir, os.path.basename(file_data.fileName) + '.srt.gzip')
+            tmp_file = os.path.join(file_data.fileDir, os.path.basename(file_data.file_name) + '.srt.gzip')
             fh = open(tmp_file, 'wb')
             fh.write(gzip_data)
             fh.close()
@@ -176,21 +176,21 @@ class OpenSubtitles(SubDownloader):
                 return False
 
             if len(search_results) == 0:
-                print('------ ERROR: Unexpected error - no subtitles although it succeeded ' + file_data.fileName)
+                print('------ ERROR: Unexpected error - no subtitles although it succeeded ' + file_data.file_name)
                 self.logout()
                 return False
 
             # Download the subtitle
             result = self.download_subtitle(file_data, lang, search_results)
             if not result:
-                print('------ ERROR: Failed to download subtitles for ' + file_data.fileName)
+                print('------ ERROR: Failed to download subtitles for ' + file_data.file_name)
                 self.logout()
                 return False
 
             self.logout()
             return True
         except Exception:
-            print('------ ERROR: Exception raised while downloading from Open subtitles (' + file_data.fileName + ')')
+            print('------ ERROR: Exception raised while downloading from Open subtitles (' + file_data.file_name + ')')
             traceback.print_exc(file=sys.stdout)
             print('-' * 60)
             self.logout()

@@ -95,7 +95,7 @@ class VideoOrganizer(IVideoOrganizer):
 
     def start_fully(self):
         # Start new downloads listener
-        self.newDownloadsHandler.start()
+        self.new_downloads_handler.start()
 
         # Start Scanner Thread
         self.scanThread.start()
@@ -116,18 +116,18 @@ class VideoOrganizer(IVideoOrganizer):
     def start(self):
         action = self.config_data['action']
 
-        if Actions.full == action:
-            self.start_fully()
-        elif Actions.init_dir == action:
-            self.newDownloadsHandler.init_dir()
-        elif Actions.scan_dir == action:
-            self.scan_dir()
-        else:
-            print('ERROR: Unknown action: Should never get here')
+        action_map = {
+            Actions.full.name: self.start_fully,
+            Actions.init_dir.name: self.new_downloads_handler.init_dir,
+            Actions.scan_dir.name: self.scan_dir,
+        }
+
+        action_func = action_map[action]
+        action_func()
 
     def stop(self):
         self.run = False
-        self.newDownloadsHandler.stop()
+        self.new_downloads_handler.stop()
 
     def __init__(self, config_data):
         self.config_data = config_data
@@ -137,5 +137,5 @@ class VideoOrganizer(IVideoOrganizer):
         self.scanIntervalSec = config_data['ScanIntervalSec']
         self.notifier = Notifier(config_data)
         self.scanThread = Thread(target=self.scan_thread)
-        self.newDownloadsHandler = NewDownloadsHandler(self, self.downloadDir, self.working_dir)
+        self.new_downloads_handler = NewDownloadsHandler(self, self.downloadDir, self.working_dir)
         self.run = True

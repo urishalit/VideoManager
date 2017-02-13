@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import IntEnum
 
 # ---------------------------------------------------------
 # Command line arguments
@@ -21,7 +21,7 @@ CMD_ARG_EMAILS = 'emails'
 
 
 # Actions
-class Actions(Enum):
+class Actions(IntEnum):
     full = 1
     init_dir = 2
     scan_dir = 3
